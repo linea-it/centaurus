@@ -1,0 +1,6 @@
+{% extends "layout.html" %}
+{% block body %}
+      {%- for test in tests %}
+        <p>{{ test.name }}</p>
+      {%- endfor %}
+{% endblock %}
