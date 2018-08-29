@@ -3,6 +3,7 @@
 from flask import Flask, render_template
 from database import init_db
 from models import Test
+import os
 
 app = Flask(__name__)
 app.debug = True
@@ -15,4 +16,5 @@ def index():
 
 if __name__ == '__main__':
     init_db()
-    app.run()
+    app.run(port=os.environ.get('PORT', '7000'),
+            host=os.environ.get('HOST', '0.0.0.0'))
