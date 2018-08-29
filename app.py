@@ -3,10 +3,14 @@
 from flask import Flask, render_template
 from database import init_db
 from models import Test
+from flask_graphql import GraphQLView
+from schema import schema
 import os
 
 app = Flask(__name__)
 app.debug = True
+
+app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
 
 @app.route('/')
 def index():
