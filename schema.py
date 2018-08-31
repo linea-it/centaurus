@@ -1,12 +1,12 @@
 import graphene
 from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
-from models import Test as TestModel
+from models import ProductClass
 
 
 class Test(SQLAlchemyObjectType):
     class Meta:
-        model = TestModel
+        model = ProductClass
         interfaces = (relay.Node, )
 
 

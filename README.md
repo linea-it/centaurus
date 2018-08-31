@@ -27,6 +27,5 @@ pip install -r requirements.txt
 Now the following command will start the server:
 
 ```bash
-./app.py
-
+/bin/sh run.sh
 ```

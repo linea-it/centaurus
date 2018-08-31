@@ -1,5 +1,7 @@
 SQLAlchemy==1.2.0
 Flask==1.0.2
 flask-SQLAlchemy==2.3.1
+psycopg2-binary==2.7.5
 graphene[sqlalchemy]
 Flask-GraphQL==2.0.0
+sqlacodegen==2.0.0

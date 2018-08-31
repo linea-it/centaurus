@@ -7,9 +7,13 @@ services:
     environment:
       - PORT=7000
       - HOST=0.0.0.0
-    entrypoint: python app.py
+      - DEBUG=false
+      - INITIALIZE_DB=true
+      - DATABASE_URI=sqlite:///database.sqlite3
+    entrypoint: /bin/sh run.sh
     working_dir: /app
     ports:
       - 7000:7000
     volumes:
       - .:/app
+      
