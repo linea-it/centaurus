@@ -3,7 +3,7 @@
 from flask import Flask, render_template
 from flask_graphql import GraphQLView
 from models import ProductClass
-from schema import schema
+from global_schema import schema
 import os
 
 app = Flask(__name__)
