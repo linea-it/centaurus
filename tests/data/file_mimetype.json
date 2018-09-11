@@ -1,0 +1,22 @@
+[
+  {
+    "display_name": "Fits Image",
+    "file_type_id": 1,
+    "mimetype_name": "application/fits-image"
+  },
+  {
+    "display_name": "Fits Catalog",
+    "file_type_id": 2,
+    "mimetype_name": "application/fits-table"
+  },
+  {
+    "display_name": "XML",
+    "file_type_id": 3,
+    "mimetype_name": "text/xml"
+  },
+  {
+    "display_name": "Text File",
+    "file_type_id": 4,
+    "mimetype_name": "text/plain"
+  }
+]

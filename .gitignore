@@ -5,3 +5,4 @@ __pycache__
 *.pyc
 
 docker-compose.yml
+global-env

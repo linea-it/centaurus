@@ -1,0 +1,5 @@
+POSTGRES_PASSWORD=resu
+POSTGRES_USER=user
+POSTGRES_DB=db_centaurus
+DB_HOST=db
+DB_PORT=

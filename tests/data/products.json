@@ -1,0 +1,46 @@
+[
+  {
+    "class_id": 11,
+    "display_name": "Coadd Objects ",
+    "file_id": null,
+    "flag_removed": false,
+    "job_id": 914484,
+    "product_id": 291394,
+    "selected_name": null,
+    "table_id": 46,
+    "version": null
+  },
+  {
+    "class_id": 11,
+    "display_name": "Coadd Objects ",
+    "file_id": null,
+    "flag_removed": false,
+    "job_id": 872322,
+    "product_id": 291773,
+    "selected_name": null,
+    "table_id": 399,
+    "version": null
+  },
+  {
+    "class_id": 2,
+    "display_name": "Galaxy Clusters 58",
+    "file_id": 476683,
+    "flag_removed": false,
+    "job_id": 965402,
+    "product_id": 308613,
+    "selected_name": null,
+    "table_id": null,
+    "version": 58
+  },
+  {
+    "class_id": 100,
+    "display_name": "Cluster Members 58",
+    "file_id": 476684,
+    "flag_removed": false,
+    "job_id": 965402,
+    "product_id": 308614,
+    "selected_name": null,
+    "table_id": null,
+    "version": 58
+  }
+]

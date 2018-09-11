@@ -1,0 +1,10 @@
+[
+  {
+    "id_site": 1,
+    "site_name": "legacy"
+  },
+  {
+    "id_site": 2,
+    "site_name": "on_cluster"
+  }
+]

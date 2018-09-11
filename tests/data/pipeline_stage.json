@@ -1,0 +1,44 @@
+[
+  {
+    "display_name": "Data Installation",
+    "level": 1,
+    "name": "data_installation",
+    "pipeline_stage_id": 1
+  },
+  {
+    "display_name": "Data Preparation",
+    "level": 2,
+    "name": "data_preparation",
+    "pipeline_stage_id": 4
+  },
+  {
+    "display_name": "Simulations",
+    "level": 4,
+    "name": "simulations",
+    "pipeline_stage_id": 7
+  },
+  {
+    "display_name": "Utilities",
+    "level": 5,
+    "name": "utilities",
+    "pipeline_stage_id": 8
+  },
+  {
+    "display_name": "Special Samples",
+    "level": 7,
+    "name": "special_samples",
+    "pipeline_stage_id": 10
+  },
+  {
+    "display_name": "Science-Ready Catalogs",
+    "level": 3,
+    "name": "valueadded_catalog",
+    "pipeline_stage_id": 5
+  },
+  {
+    "display_name": "Science Analysis",
+    "level": 6,
+    "name": "science",
+    "pipeline_stage_id": 9
+  }
+]

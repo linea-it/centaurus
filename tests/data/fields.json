@@ -1,0 +1,24 @@
+[
+  {
+    "discovery_date": "2015-03-21",
+    "display_name": "COSMOS D04",
+    "field_id": 47,
+    "field_name": "Y1A1_COADD_COSMOS_D04",
+    "install_date": "2015-09-04",
+    "release_date": "2015-03-19",
+    "release_tag_id": 24,
+    "start_date": "2015-10-19",
+    "status": true
+  },
+  {
+    "discovery_date": "2014-10-10",
+    "display_name": "STRIPE82",
+    "field_id": 40,
+    "field_name": "Y1A1_COADD_STRIPE82",
+    "install_date": "2015-09-05",
+    "release_date": "2014-10-10",
+    "release_tag_id": 24,
+    "start_date": "2015-11-03",
+    "status": true
+  }
+]

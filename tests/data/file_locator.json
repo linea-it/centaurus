@@ -1,0 +1,22 @@
+[
+  {
+    "category_id": null,
+    "file_id": 476683,
+    "file_name": "wazp_cluster.fits",
+    "file_type_id": 2,
+    "namespace": "archive",
+    "provenance_id": null,
+    "survey_id": null,
+    "uri": "/e2/66/000010031073/wazp_cluster.fits"
+  },
+  {
+    "category_id": null,
+    "file_id": 476684,
+    "file_name": "wazp_membership.fits",
+    "file_type_id": 2,
+    "namespace": "archive",
+    "provenance_id": null,
+    "survey_id": null,
+    "uri": "/e2/66/000010031073/wazp_membership.fits"
+  }
+]

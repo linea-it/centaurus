@@ -1,0 +1,12 @@
+[
+  {
+    "display_name": "Enabled",
+    "name": "enabled",
+    "pipeline_status_id": 1
+  },
+  {
+    "display_name": "Disabled",
+    "name": "disabled",
+    "pipeline_status_id": 2
+  }
+]

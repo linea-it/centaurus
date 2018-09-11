@@ -1,0 +1,12 @@
+[
+  {
+    "schema_name": "y1a1_coadd_cosmos_d04",
+    "table_id": 46,
+    "table_name": "coadd_objects"
+  },
+  {
+    "schema_name": "y1a1_coadd_stripe82",
+    "table_id": 399,
+    "table_name": "coadd_objects"
+  }
+]

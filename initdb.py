@@ -1,21 +1,34 @@
 # coding: utf-8
+from sqlalchemy import DDL, event
+from database import engine, db_session, Base
 
-from database import engine, db_session
-from models import ProductType, ProductClass
+from models import (
+    ProductType, ProductClass, FileMimetype, GroupPypelines,
+    PipelineStage, PipelineStatus, ProcessStatus, ProcessingSite,
+    Tables, TgUser, FileLocator, Modules, Pipelines, Session,
+    PipelinesConfig, Processes, ProcessPipeline, JobRuns,
+    Products, ReleaseTag, Fields, PipelinesModules
+)
 import json
 
+event.listen(
+    Base.metadata, 'before_create',
+    DDL("CREATE SCHEMA IF NOT EXISTS coadd")
+)
 
-def has_table(tablename):
+
+def has_table(tablename, schema=None):
     """ Check if the table exists in the database
     
     Arguments:
-        tablename {str} -- tablename
+        tablename {str} -- table name
+        schema {str} -- schema name
     
     Returns:
         boolean -- True has table, False not has table
     """
             
-    return engine.dialect.has_table(engine, tablename)
+    return engine.dialect.has_table(engine, tablename, schema)
 
 
 def ingest_json(class_table):
@@ -27,7 +40,7 @@ def ingest_json(class_table):
 
 
     with open('{}/{}.json'.format(
-        'tests/data', class_table.__tablename__
+       'tests/data', class_table.__tablename__
     )) as json_file:
         data = json.load(json_file)
 
@@ -37,10 +50,15 @@ def ingest_json(class_table):
     db_session.commit()
 
 
-if not has_table(tablename=ProductType.__tablename__):
-    ProductType.metadata.create_all(bind=engine, tables=[ProductType.__table__])
-    ingest_json(ProductType)
+classes = [
+    ProductType, ProductClass, FileMimetype, GroupPypelines,
+    PipelineStage, PipelineStatus, ProcessStatus, ProcessingSite,
+    Tables, TgUser, FileLocator, Modules, Pipelines, Session,
+    PipelinesConfig, Processes, ProcessPipeline, JobRuns,
+    Products, ReleaseTag, Fields, PipelinesModules
+]
 
-if not has_table(tablename=ProductClass.__tablename__):
-    ProductClass.metadata.create_all(bind=engine, tables=[ProductClass.__table__])
-    ingest_json(ProductClass)
+for item in classes:
+    if not has_table(item.__tablename__, item.__table__.schema):
+        item.metadata.create_all(bind=engine, tables=[item.__table__])
+        ingest_json(item)

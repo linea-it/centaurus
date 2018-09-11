@@ -4,6 +4,7 @@ from schemas.product_class import ProductClass
 from schemas.product_type import ProductType
 from models import ProductClass as ProductClassModel
 
+
 class Query(ObjectType):
     """Query objects for GraphQL API"""
 

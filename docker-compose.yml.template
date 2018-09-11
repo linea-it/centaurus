@@ -1,19 +1,26 @@
 version: "3"
 
 services:
+  db:
+    image: postgres:9.4
+    env_file:
+      - global-env
+
   centaurus:
     build: .
     user: ${CURRENT_UID}
+    env_file:
+      - global-env
     environment:
       - PORT=7000
       - HOST=0.0.0.0
       - DEBUG=false
       - INITIALIZE_DB=true
-      - DATABASE_URI=sqlite:///database.sqlite3
     entrypoint: /bin/sh run.sh
     working_dir: /app
     ports:
       - 7000:7000
     volumes:
       - .:/app
-      
+    depends_on:
+      - db

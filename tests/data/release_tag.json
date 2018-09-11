@@ -1,0 +1,11 @@
+[
+  {
+    "description": "A subset of Y1A1_COADD coadds in the Stripe82 region.",
+    "doc_url": "https://deswiki.cosmology.illinois.edu/confluence/x/BgAi",
+    "name": "Y1A1_COADD",
+    "release_date": "2014-10-10",
+    "release_display_name": "Y1A1",
+    "tag_id": 24,
+    "version": "v1.6"
+  }
+]

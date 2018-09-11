@@ -1,0 +1,184 @@
+[
+  {
+    "display_name": "Hidden",
+    "group_id": 43,
+    "name": "hidden",
+    "order_number": 10000,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Catalog Production",
+    "group_id": 13,
+    "name": "catalog_production",
+    "order_number": 30200,
+    "parent_group_id": 43
+  },
+  {
+    "display_name": "Science Analysis",
+    "group_id": 29,
+    "name": "science",
+    "order_number": 22000,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Simulation",
+    "group_id": 55,
+    "name": "simulation",
+    "order_number": 40600,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "Correlation",
+    "group_id": 33,
+    "name": "correlation",
+    "order_number": 40610,
+    "parent_group_id": 55
+  },
+  {
+    "display_name": "Combined Probes",
+    "group_id": 49,
+    "name": "combined_probes",
+    "order_number": 41100,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "LSS",
+    "group_id": 51,
+    "name": "lss",
+    "order_number": 40100,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "Cluster",
+    "group_id": 52,
+    "name": "cluster",
+    "order_number": 40200,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "Galaxy Archeology",
+    "group_id": 57,
+    "name": "galaxy_archeology",
+    "order_number": 40700,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "QSO",
+    "group_id": 58,
+    "name": "qso",
+    "order_number": 40900,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "Strong Lensing",
+    "group_id": 59,
+    "name": "strong_lensing",
+    "order_number": 41000,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "SN",
+    "group_id": 60,
+    "name": "sn",
+    "order_number": 40300,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "WL",
+    "group_id": 61,
+    "name": "wl",
+    "order_number": 40400,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "Fitters",
+    "group_id": 62,
+    "name": "fitters",
+    "order_number": 40110,
+    "parent_group_id": 51
+  },
+  {
+    "display_name": "SEDs",
+    "group_id": 63,
+    "name": "seds",
+    "order_number": 10100,
+    "parent_group_id": 43
+  },
+  {
+    "display_name": "Survey",
+    "group_id": 65,
+    "name": "survey",
+    "order_number": 30110,
+    "parent_group_id": 43
+  },
+  {
+    "display_name": "Science-Ready Catalogs",
+    "group_id": 67,
+    "name": "valueadded_catalog",
+    "order_number": 21500,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Galaxy Evolution",
+    "group_id": 77,
+    "name": "galaxy_evolution",
+    "order_number": 40800,
+    "parent_group_id": 29
+  },
+  {
+    "display_name": "Cluster Comparison",
+    "group_id": 80,
+    "name": "cluster_comparison",
+    "order_number": 40220,
+    "parent_group_id": 52
+  },
+  {
+    "display_name": "Examples",
+    "group_id": 85,
+    "name": "examples",
+    "order_number": 60000,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Data Preparation",
+    "group_id": 94,
+    "name": "data_preparation",
+    "order_number": 20500,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Clustering Tools",
+    "group_id": 95,
+    "name": "clustering_tools",
+    "order_number": 40210,
+    "parent_group_id": 51
+  },
+  {
+    "display_name": "Data Installation",
+    "group_id": 97,
+    "name": "data_installation",
+    "order_number": 20400,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Parameter Estimation",
+    "group_id": 98,
+    "name": "parameterestimation",
+    "order_number": 50200,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Utilities",
+    "group_id": 99,
+    "name": "utilities",
+    "order_number": 55000,
+    "parent_group_id": null
+  },
+  {
+    "display_name": "Special Samples",
+    "group_id": 100,
+    "name": "special_samples",
+    "order_number": 55500,
+    "parent_group_id": null
+  }
+]
