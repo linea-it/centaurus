@@ -14,7 +14,7 @@ services:
     environment:
       - PORT=7000
       - HOST=0.0.0.0
-      - DEBUG=false
+      - FLASK_ENV=development
       - INITIALIZE_DB=true
     entrypoint: /bin/sh run.sh
     working_dir: /app
