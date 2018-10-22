@@ -5,10 +5,13 @@ from flask_graphql import GraphQLView
 from models import ProductClass
 from global_schema import schema
 import os
+from flask_cors import CORS
+
 
 app = Flask(__name__)
 
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
+cors = CORS(app, resources={r"/graphql": {"origins": "*", "supports_credentials": True}})
 
 @app.route('/')
 def index():
