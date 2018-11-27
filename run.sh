@@ -16,5 +16,7 @@ if $INITIALIZE_DB ; then
     echo "Done."
 fi
 
+pip install -r requirements.txt
+
 echo "Initializing Centaurus..."
 python app.py
