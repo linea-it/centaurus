@@ -240,8 +240,6 @@ class Processes(Base):
     process_status = relationship('ProcessStatus')
     fields = relationship('Fields', secondary='coadd.process_fields')
 
-    # pipelines = relationship('Pipelines', secondary='process_pipeline')
-
 
 class ProcessPipeline(Base):
     __tablename__ = 'process_pipeline'
@@ -254,7 +252,6 @@ class ProcessPipeline(Base):
     version = Column(String(10), nullable=False)
     version_date = Column(DateTime)
 
-    # pipeline = relationship('Pipelines', backref=backref("process_pipeline"))
     process = relationship('Processes', backref=backref("process_pipeline"))
 
 
@@ -348,7 +345,6 @@ class Fields(Base):
     release_tag_id = Column(ForeignKey('coadd.release_tag.tag_id'), nullable=False)
 
     release_tag = relationship('ReleaseTag')
-    # processes = relationship('Processes', secondary='coadd.process_fields')
 
 
 class ProcessFields(Base):
@@ -359,7 +355,6 @@ class ProcessFields(Base):
     process_id = Column(ForeignKey('processes.process_id'), primary_key=True, nullable=False)
 
     fields = relationship('Fields', backref=backref("coadd.process_fields"))
-    # processes = relationship('Processes', backref=backref("coadd.process_fields"))
 
 
 class PipelinesModules(Base):

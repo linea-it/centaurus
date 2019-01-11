@@ -8,7 +8,8 @@ from models import (
     ProcessPipeline as ProcessPipelineModel,
     Processes as ProcessesModel,
     ProcessFields as ProcessFieldsModel,
-    Fields as FieldsModel
+    Fields as FieldsModel,
+    ProcessStatus as ProcessStatusModel
 )
 
 from views import PipelinesExecution as PipelinesExecutionModel
@@ -24,6 +25,7 @@ class ProcessExecutionNode(ObjectType):
     last_process_id = Int()
     start_time = DateTime()
     end_time = DateTime()
+    status = String()
 
 
 class PipelinesExecutionAttribute():
@@ -67,10 +69,13 @@ class PipelinesExecution(SQLAlchemyObjectType, PipelinesExecutionAttribute):
         proc = db_session.query(
             ProcessesModel.start_time,
             ProcessesModel.end_time,
+            ProcessStatusModel.name.label('status'),
             subproc.c.process_count,
             subproc.c.last_process_id
         ).join(
             subproc, ProcessesModel.process_id == subproc.c.last_process_id
+        ).join(
+            ProcessStatusModel
         ).one_or_none()
 
         procexec = proc._asdict() if proc else {}
