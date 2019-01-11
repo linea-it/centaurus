@@ -5,6 +5,8 @@ if [ ! -z "$DB_PORT" ]; then
     DB_PORT_STR="-p $DB_PORT";
 fi
 
+pip install -r requirements.txt
+
 until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$DB_HOST" $DB_PORT_STR -U "$POSTGRES_USER" "$POSTGRES_DB" -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 2
@@ -15,8 +17,6 @@ if $INITIALIZE_DB ; then
     python initdb.py
     echo "Done."
 fi
-
-pip install -r requirements.txt
 
 echo "Initializing Centaurus..."
 python app.py

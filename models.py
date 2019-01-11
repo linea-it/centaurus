@@ -5,7 +5,8 @@ from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, Column, DateTime, ForeignKey,
     Integer, String, Text, UniqueConstraint, text, Sequence, Float, Date
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
+from sqlalchemy.orm import relationship, backref
 
 
 class ProductType(Base):
@@ -160,6 +161,18 @@ class Modules(Base):
     user = relationship('TgUser')
 
 
+class Session(Base):
+    __tablename__ = 'session'
+
+    session_id = Column(Text, primary_key=True)
+    data = Column(Text, nullable=False, server_default=text("now()"))
+    expiration_time = Column(DateTime)
+    user_id = Column(ForeignKey('tg_user.user_id'), nullable=False)
+    tg_session = Column(String(64))
+
+    user = relationship('TgUser')
+
+
 class Pipelines(Base):
     __tablename__ = 'pipelines'
 
@@ -186,37 +199,7 @@ class Pipelines(Base):
     pipeline_status = relationship('PipelineStatus')
     user = relationship('TgUser')
 
-
-class Session(Base):
-    __tablename__ = 'session'
-
-    session_id = Column(Text, primary_key=True)
-    data = Column(Text, nullable=False, server_default=text("now()"))
-    expiration_time = Column(DateTime)
-    user_id = Column(ForeignKey('tg_user.user_id'), nullable=False)
-    tg_session = Column(String(64))
-
-    user = relationship('TgUser')
-
-
-class PipelinesConfig(Base):
-    __tablename__ = 'pipelines_config'
-
-    seq = Sequence('pipelines_config_id_seq', metadata=Base.metadata)
-
-    config_id = Column(Integer, seq, primary_key=True)
-    owner_id = Column(ForeignKey('tg_user.user_id', ondelete='CASCADE'), nullable=False)
-    name = Column(String(35), nullable=False, unique=True)
-    description = Column(Text)
-    comments = Column(Text)
-    creation_date = Column(DateTime(True), nullable=False, server_default=text("now()"))
-    last_time_used = Column(DateTime(True))
-    pipeline_id = Column(ForeignKey('pipelines.pipeline_id'), nullable=False)
-    default_date = Column(DateTime(True))
-    xml_workflow = Column(Text)
-
-    owner = relationship('TgUser')
-    pipeline = relationship('Pipelines')
+    processes = relationship('Processes', secondary='process_pipeline')
 
 
 class Processes(Base):
@@ -254,7 +237,10 @@ class Processes(Base):
     config = relationship('PipelinesConfig')
     processing_site = relationship('ProcessingSite')
     session = relationship('Session')
-    status = relationship('ProcessStatus')
+    process_status = relationship('ProcessStatus')
+    fields = relationship('Fields', secondary='coadd.process_fields')
+
+    # pipelines = relationship('Pipelines', secondary='process_pipeline')
 
 
 class ProcessPipeline(Base):
@@ -268,8 +254,8 @@ class ProcessPipeline(Base):
     version = Column(String(10), nullable=False)
     version_date = Column(DateTime)
 
-    pipeline = relationship('Pipelines')
-    process = relationship('Processes')
+    # pipeline = relationship('Pipelines', backref=backref("process_pipeline"))
+    process = relationship('Processes', backref=backref("process_pipeline"))
 
 
 class JobRuns(Base):
@@ -320,6 +306,16 @@ class Products(Base):
     table = relationship('Tables')
 
 
+class ProcessProducts(Base):
+    __tablename__ = 'process_products'
+    
+    process_id = Column(ForeignKey('processes.process_id'), primary_key=True, nullable=False)
+    product_id = Column(ForeignKey('products.product_id'), primary_key=True, nullable=False)
+
+    processes = relationship('Processes')
+    products = relationship('Products')
+
+
 class ReleaseTag(Base):
     __tablename__ = 'release_tag'
     __table_args__ = {'schema': 'coadd'}
@@ -352,6 +348,18 @@ class Fields(Base):
     release_tag_id = Column(ForeignKey('coadd.release_tag.tag_id'), nullable=False)
 
     release_tag = relationship('ReleaseTag')
+    # processes = relationship('Processes', secondary='coadd.process_fields')
+
+
+class ProcessFields(Base):
+    __tablename__ = 'process_fields'
+    __table_args__ = {'schema': 'coadd'}
+
+    field_id = Column(ForeignKey('coadd.fields.field_id'), primary_key=True, nullable=False)
+    process_id = Column(ForeignKey('processes.process_id'), primary_key=True, nullable=False)
+
+    fields = relationship('Fields', backref=backref("coadd.process_fields"))
+    # processes = relationship('Processes', backref=backref("coadd.process_fields"))
 
 
 class PipelinesModules(Base):
@@ -362,4 +370,24 @@ class PipelinesModules(Base):
     xml_config = Column(Text)
 
     module = relationship('Modules')
+    pipeline = relationship('Pipelines')
+
+
+class PipelinesConfig(Base):
+    __tablename__ = 'pipelines_config'
+
+    seq = Sequence('pipelines_config_id_seq', metadata=Base.metadata)
+
+    config_id = Column(Integer, seq, primary_key=True)
+    owner_id = Column(ForeignKey('tg_user.user_id', ondelete='CASCADE'), nullable=False)
+    name = Column(String(35), nullable=False, unique=True)
+    description = Column(Text)
+    comments = Column(Text)
+    creation_date = Column(DateTime(True), nullable=False, server_default=text("now()"))
+    last_time_used = Column(DateTime(True))
+    pipeline_id = Column(ForeignKey('pipelines.pipeline_id'), nullable=False)
+    default_date = Column(DateTime(True))
+    xml_workflow = Column(Text)
+
+    owner = relationship('TgUser')
     pipeline = relationship('Pipelines')

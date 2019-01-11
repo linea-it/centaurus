@@ -1,12 +1,7 @@
-from graphene import Int, String, Boolean, DateTime, relay
+from graphene import Int, String, Boolean, DateTime, List, Field, ObjectType, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
-
 from models import Pipelines as PipelinesModel
-
-# from schemas.group_pypelines import GroupPypelines
-# from schemas.tg_user import TgUser
-# from schemas.pipeline_stage import PipelineStage
-# from schemas.pipeline_status import PipelineStatus
+from schemas.processes import Processes
 
 
 class PipelinesAttribute():
@@ -25,11 +20,13 @@ class PipelinesAttribute():
     multidataset = Boolean(description="Allows multiple datasets to be used if true")
     readme = String(description="Document describing how the pipeline works.")
     any_output_class = Boolean()
+    processes = List(lambda: Processes) 
 
 
 class Pipelines(SQLAlchemyObjectType, PipelinesAttribute):
     """Pipelines node"""
 
+    
     class Meta:
         model = PipelinesModel
         interfaces = (relay.Node,)
