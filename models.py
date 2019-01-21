@@ -239,6 +239,7 @@ class Processes(Base):
     session = relationship('Session')
     process_status = relationship('ProcessStatus')
     fields = relationship('Fields', secondary='coadd.process_fields')
+    products = relationship('Products', secondary='process_products')    
 
 
 class ProcessPipeline(Base):
@@ -302,6 +303,8 @@ class Products(Base):
     job = relationship('JobRuns')
     table = relationship('Tables')
 
+    process = relationship('Processes', secondary='process_products')
+
 
 class ProcessProducts(Base):
     __tablename__ = 'process_products'
@@ -309,8 +312,8 @@ class ProcessProducts(Base):
     process_id = Column(ForeignKey('processes.process_id'), primary_key=True, nullable=False)
     product_id = Column(ForeignKey('products.product_id'), primary_key=True, nullable=False)
 
-    processes = relationship('Processes')
-    products = relationship('Products')
+    process = relationship('Processes', backref=backref("process_products"))
+    products = relationship('Products', backref=backref("process_products"))
 
 
 class ReleaseTag(Base):

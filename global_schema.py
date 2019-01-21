@@ -4,7 +4,6 @@ from graphene import Schema, ObjectType, Field, List, String, Int
 from sqlalchemy import func, or_
 from database import db_session
 
-
 from schemas.product_class import ProductClass
 from schemas.product_type import ProductType
 from schemas.tg_user import TgUser
@@ -17,6 +16,9 @@ from schemas.release_tag import ReleaseTag
 from schemas.fields import Fields
 from schemas.pipeline_status import PipelineStatus
 from schemas.processes import Processes
+from schemas.products import Products
+from schemas.file_locator import FileLocator
+from schemas.tables import Tables
 from schemas.process_status import ProcessStatus
 from schemas.session import Session
 from schemas.pipelines_execution import PipelinesExecution
@@ -29,6 +31,8 @@ from models import (
    Modules as ModulesModel,
    Processes as ProcessesModel,
    ProcessFields as ProcessFieldsModel,
+   ProcessProducts as ProcessProductsModel,
+   Products as ProductsModel,
    Fields as FieldsModel
 )
 
@@ -62,6 +66,7 @@ class Query(ObjectType):
    fields_by_tag_id = List(lambda: Fields, tag_id=Int())
    pipelines_by_field_id_and_stage_id = List(lambda: PipelinesExecution, stage_id=Int(), field_id=Int())
    processes_by_field_id_and_pipeline_id = List(lambda: Processes, field_id=Int(), pipeline_id=Int())
+   products_by_process_id = List(lambda: Products, process_id=Int())
 
    def resolve_pipelines_by_field_id_and_stage_id(self, info, stage_id, field_id=None):
       query = PipelinesExecution.get_query(info)
@@ -84,16 +89,30 @@ class Query(ObjectType):
          PipelinesExecutionModel.name
       )
 
-   def resolve_processes_by_field_id_and_pipeline_id(self, info, field_id, pipeline_id):
+   def resolve_processes_by_field_id_and_pipeline_id(self, info, pipeline_id, field_id=None):
       query = Processes.get_query(info)
-      return query.join(
+      return query.filter_by(
+         instance=instance, flag_removed=False
+      ).join(
          ProcessPipelineModel
       ).filter_by(
          pipeline_id=pipeline_id
-      ).join(
+      ).outerjoin(
          ProcessFieldsModel
       ).filter_by(
          field_id=field_id
+      ).order_by(
+         ProcessesModel.process_id.desc()
+      )
+
+   def resolve_products_by_process_id(self, info, process_id):
+      query = Products.get_query(info)
+      return query.join(
+         ProcessProductsModel
+      ).filter_by(
+         process_id=process_id
+      ).order_by(
+         ProductsModel.product_id
       )
 
    def resolve_fields_by_tag_id(self, info, tag_id):
