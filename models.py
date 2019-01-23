@@ -238,6 +238,7 @@ class Processes(Base):
     processing_site = relationship('ProcessingSite')
     session = relationship('Session')
     process_status = relationship('ProcessStatus')
+    
     fields = relationship('Fields', secondary='coadd.process_fields')
     products = relationship('Products', secondary='process_products')    
 
@@ -389,3 +390,15 @@ class PipelinesConfig(Base):
 
     owner = relationship('TgUser')
     pipeline = relationship('Pipelines')
+
+
+class ProcessComponent(Base):
+    __tablename__ = 'process_component'
+
+    process_id = Column(ForeignKey('processes.process_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    module_id = Column(ForeignKey('modules.module_id'), primary_key=True, nullable=False)
+    version = Column(String(10), nullable=False)
+    version_date = Column(DateTime)
+
+    module = relationship('Modules')
+    process = relationship('Processes')

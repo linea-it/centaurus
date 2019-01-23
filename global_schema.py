@@ -20,6 +20,7 @@ from schemas.products import Products
 from schemas.file_locator import FileLocator
 from schemas.tables import Tables
 from schemas.process_status import ProcessStatus
+from schemas.process_component import ProcessComponent
 from schemas.session import Session
 from schemas.pipelines_execution import PipelinesExecution
 
@@ -33,6 +34,7 @@ from models import (
    ProcessFields as ProcessFieldsModel,
    ProcessProducts as ProcessProductsModel,
    Products as ProductsModel,
+   ProcessComponent as ProcessComponentModel,
    Fields as FieldsModel
 )
 
@@ -61,12 +63,14 @@ class Query(ObjectType):
    product_class_by_class_name = Field(lambda: ProductClass, name=String())
    pipelines_by_name = Field(lambda: Pipelines, name=String())
    modules_by_name = Field(lambda: Modules, name=String())
+   process_by_process_id = Field(lambda: Processes, process_id=Int())
 
    # gets list by id 
    fields_by_tag_id = List(lambda: Fields, tag_id=Int())
    pipelines_by_field_id_and_stage_id = List(lambda: PipelinesExecution, stage_id=Int(), field_id=Int())
    processes_by_field_id_and_pipeline_id = List(lambda: Processes, field_id=Int(), pipeline_id=Int())
    products_by_process_id = List(lambda: Products, process_id=Int())
+   process_components_by_process_id = List(lambda: ProcessComponent, process_id=Int())
 
    def resolve_pipelines_by_field_id_and_stage_id(self, info, stage_id, field_id=None):
       query = PipelinesExecution.get_query(info)
@@ -115,20 +119,36 @@ class Query(ObjectType):
          ProductsModel.product_id
       )
 
+   def resolve_process_components_by_process_id(self, info, process_id):
+      query = ProcessComponent.get_query(info)
+      return query.filter_by(
+         process_id=process_id
+      ).order_by(
+         ProcessComponentModel.module_id
+      )
+
+   def resolve_process_by_process_id(self, info, process_id):
+      query = Processes.get_query(info)
+      return query.filter_by(
+         process_id=process_id
+      ).order_by(
+         ProcessesModel.process_id
+      ).one_or_none()
+
    def resolve_fields_by_tag_id(self, info, tag_id):
        query = Fields.get_query(info)
        return query.filter(FieldsModel.release_tag_id == tag_id)
 
    def resolve_product_class_by_class_name(self, info, name):
        query = ProductClass.get_query(info)
-       return query.filter(ProductClassModel.class_name == name).first()
+       return query.filter(ProductClassModel.class_name == name).one_or_none()
 
    def resolve_pipelines_by_name(self, info, name):
         query = Pipelines.get_query(info)
-        return query.filter(PipelinesModel.name == name).first()
+        return query.filter(PipelinesModel.name == name).one_or_none()
 
    def resolve_modules_by_name(self, info, name):
         query = Modules.get_query(info)
-        return query.filter(ModulesModel.name == name).first()
+        return query.filter(ModulesModel.name == name).one_or_none()
 
 schema = Schema(query=Query)
