@@ -2,11 +2,14 @@
 
 from database import Base, engine
 from sqlalchemy import (
-    BigInteger, Boolean, CheckConstraint, Column, DateTime, ForeignKey,
-    Integer, String, Text, UniqueConstraint, text, Sequence, Float, Date
+    BigInteger, Boolean, CheckConstraint, Column, DateTime, Date, 
+    Integer, String, Text, UniqueConstraint, text, Sequence, Float,
+    Table, ForeignKey
 )
 from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, backref
+
+metadata = Base.metadata
 
 
 class ProductType(Base):
@@ -238,9 +241,10 @@ class Processes(Base):
     processing_site = relationship('ProcessingSite')
     session = relationship('Session')
     process_status = relationship('ProcessStatus')
-    
+
     fields = relationship('Fields', secondary='coadd.process_fields')
-    products = relationship('Products', secondary='process_products')    
+    inputs = relationship('Products', secondary='process_inputs')
+    products = relationship('Products')
 
 
 class ProcessPipeline(Base):
@@ -294,6 +298,7 @@ class Products(Base):
     job_id = Column(ForeignKey('job_runs.job_id', ondelete='CASCADE'), nullable=False)
     table_id = Column(ForeignKey('tables.table_id', ondelete='CASCADE'))
     class_id = Column(ForeignKey('product_class.class_id'), nullable=False)
+    process_id = Column(ForeignKey('processes.process_id', ondelete='CASCADE'), nullable=False)
     flag_removed = Column(Boolean, nullable=False, server_default=text("false"))
     display_name = Column(String(75))
     version = Column(Integer)
@@ -303,18 +308,17 @@ class Products(Base):
     file = relationship('FileLocator')
     job = relationship('JobRuns')
     table = relationship('Tables')
+    process = relationship('Processes')
 
-    process = relationship('Processes', secondary='process_products')
 
+class ProcessInputs(Base):
+    __tablename__ = 'process_inputs'
 
-class ProcessProducts(Base):
-    __tablename__ = 'process_products'
-    
-    process_id = Column(ForeignKey('processes.process_id'), primary_key=True, nullable=False)
-    product_id = Column(ForeignKey('products.product_id'), primary_key=True, nullable=False)
+    process_id = Column(ForeignKey('processes.process_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    product_id = Column(ForeignKey('products.product_id', ondelete='CASCADE'), primary_key=True, nullable=False)
 
-    process = relationship('Processes', backref=backref("process_products"))
-    products = relationship('Products', backref=backref("process_products"))
+    process = relationship('Processes', backref=backref("process_inputs"))
+    products = relationship('Products', backref=backref("process_inputs"))
 
 
 class ReleaseTag(Base):

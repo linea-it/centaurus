@@ -12,7 +12,7 @@ from models import (
     PipelineStage, PipelineStatus, ProcessStatus, ProcessingSite,
     Tables, TgUser, FileLocator, Modules, Pipelines, Session,
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
-    Products, ProcessProducts, ReleaseTag, Fields, ProcessFields,
+    Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
     PipelinesModules, ProcessComponent
 )
 
@@ -60,7 +60,7 @@ classes = [
     PipelineStage, PipelineStatus, ProcessStatus, ProcessingSite,
     Tables, TgUser, FileLocator, Modules, Pipelines, Session,
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
-    Products, ProcessProducts, ReleaseTag, Fields, ProcessFields,
+    Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
     PipelinesModules, ProcessComponent
 ]
 

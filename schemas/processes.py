@@ -1,7 +1,6 @@
-from graphene import Int, String, Boolean, DateTime, List, relay
+from graphene import Int, String, Boolean, DateTime, List, Field, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from schemas.fields import Fields
 from models import Processes as ProcessesModel
 
 
@@ -29,7 +28,6 @@ class ProcessesAttribute():
     status_id = Int()
     size = Int()
     config_id = Int()
-    fields = List(lambda: Fields)
 
 
 class Processes(SQLAlchemyObjectType, ProcessesAttribute):
