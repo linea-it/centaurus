@@ -8,7 +8,8 @@
     "product_id": 291394,
     "selected_name": null,
     "table_id": 46,
-    "version": null
+    "version": null,
+    "process_id": 10024396
   },
   {
     "class_id": 11,
@@ -19,7 +20,8 @@
     "product_id": 291773,
     "selected_name": null,
     "table_id": 399,
-    "version": null
+    "version": null,
+    "process_id": 10021032
   },
   {
     "class_id": 2,
@@ -30,7 +32,8 @@
     "product_id": 308613,
     "selected_name": null,
     "table_id": null,
-    "version": 58
+    "version": 58,
+    "process_id": 10031073
   },
   {
     "class_id": 100,
@@ -41,6 +44,7 @@
     "product_id": 308614,
     "selected_name": null,
     "table_id": null,
-    "version": 58
+    "version": 58,
+    "process_id": 10031073
   }
 ]

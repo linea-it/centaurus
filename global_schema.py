@@ -23,6 +23,7 @@ from schemas.process_status import ProcessStatus
 from schemas.process_component import ProcessComponent
 from schemas.session import Session
 from schemas.pipelines_execution import PipelinesExecution
+from schemas.job_runs import JobRuns
 
 from models import (
    ProductClass as ProductClassModel,
@@ -32,7 +33,6 @@ from models import (
    Modules as ModulesModel,
    Processes as ProcessesModel,
    ProcessFields as ProcessFieldsModel,
-   ProcessProducts as ProcessProductsModel,
    Products as ProductsModel,
    ProcessComponent as ProcessComponentModel,
    Fields as FieldsModel
@@ -111,9 +111,7 @@ class Query(ObjectType):
 
    def resolve_products_by_process_id(self, info, process_id):
       query = Products.get_query(info)
-      return query.join(
-         ProcessProductsModel
-      ).filter_by(
+      return query.filter_by(
          process_id=process_id
       ).order_by(
          ProductsModel.product_id
