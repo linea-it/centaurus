@@ -1,5 +1,5 @@
 [
-    {"comment_id": 1, "comments":"<![CDATA[Running InstallCatalog without DownloadRequest over Y1A1 S82 to register products in the new database model]]>","process_id":10021032,"date":"2015-11-03T15:01:01.808371","user_id":374,"hid":null,"hid_title":null},
-    {"comment_id": 2, "comments":"---","process_id":10024396,"date":"2016-08-30T14:29:48.776527","user_id":133,"hid":null,"hid_title":null},
-    {"comment_id": 3, "comments":"validation run","process_id":10031073,"date":"2018-06-05T20:20:53.176613","user_id":345,"hid":null,"hid_title":null}
+    {"comment_id": 1, "comments":"<![CDATA[Running InstallCatalog without DownloadRequest over Y1A1 S82 to register products in the new database model]]>","process_id":10021032,"date":"2015-11-03T15:01:01.808371","user_id":1,"hid":null,"hid_title":null},
+    {"comment_id": 2, "comments":"---","process_id":10024396,"date":"2016-08-30T14:29:48.776527","user_id":1,"hid":null,"hid_title":null},
+    {"comment_id": 3, "comments":"validation run","process_id":10031073,"date":"2018-06-05T20:20:53.176613","user_id":1,"hid":null,"hid_title":null}
 ]
