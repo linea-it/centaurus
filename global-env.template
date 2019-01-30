@@ -4,3 +4,5 @@ POSTGRES_DB=db_centaurus
 DB_HOST=db
 DB_PORT=
 API_INSTANCE=testing
+SCIENCE_URL=http://testing.linea.gov.br
+DACHS_URL=http://dachsdev.linea.gov.br
