@@ -2,6 +2,9 @@ from graphene import Int, String, Boolean, DateTime, List, Field, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
 from models import Processes as ProcessesModel
+import os
+
+SCIENCE_URL = os.getenv('SCIENCE_URL')
 
 
 class ProcessesAttribute():
@@ -28,11 +31,22 @@ class ProcessesAttribute():
     status_id = Int()
     size = Int()
     config_id = Int()
+    product_log = String()
 
 
 class Processes(SQLAlchemyObjectType, ProcessesAttribute):
     """Processes node"""
 
+
     class Meta:
         model = ProcessesModel
         interfaces = (relay.Node,)
+
+
+    def resolve_product_log(self, info):
+        """ Mount the product_log link """
+
+        return os.path.join(
+            SCIENCE_URL,
+            "VP/getViewProcessCon?process_id=%s" % self.process_id
+        )

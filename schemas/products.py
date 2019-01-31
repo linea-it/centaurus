@@ -16,6 +16,7 @@ class ProductsAttribute():
     display_name = String()
     version = Int()
     selected_name = String()
+    data_type = String()
 
 
 class Products(SQLAlchemyObjectType, ProductsAttribute):
@@ -24,3 +25,13 @@ class Products(SQLAlchemyObjectType, ProductsAttribute):
     class Meta:
         model = ProductsModel
         interfaces = (relay.Node,)
+
+    def resolve_data_type(self, info):
+        """ Returns data type of the product """
+
+        data_type = 'Table'
+
+        if self.file_id:
+            data_type = 'File'
+
+        return data_type

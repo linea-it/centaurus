@@ -24,6 +24,7 @@ from schemas.process_component import ProcessComponent
 from schemas.session import Session
 from schemas.pipelines_execution import PipelinesExecution
 from schemas.job_runs import JobRuns
+from schemas.comments import Comments
 
 from models import (
    ProductClass as ProductClassModel,
@@ -35,14 +36,15 @@ from models import (
    ProcessFields as ProcessFieldsModel,
    Products as ProductsModel,
    ProcessComponent as ProcessComponentModel,
-   Fields as FieldsModel
+   Fields as FieldsModel,
+   Comments as CommentsModel
 )
 
 from views import PipelinesExecution as PipelinesExecutionModel
 
 import os
 
-instance = os.getenv('API_INSTANCE')
+INSTANCE = os.getenv('API_INSTANCE')
 
 
 class Query(ObjectType):
@@ -71,12 +73,13 @@ class Query(ObjectType):
    processes_by_field_id_and_pipeline_id = List(lambda: Processes, field_id=Int(), pipeline_id=Int())
    products_by_process_id = List(lambda: Products, process_id=Int())
    process_components_by_process_id = List(lambda: ProcessComponent, process_id=Int())
+   comments_by_process_id = List(lambda: Comments, process_id=Int())
 
    def resolve_pipelines_by_field_id_and_stage_id(self, info, stage_id, field_id=None):
       query = PipelinesExecution.get_query(info)
 
       return query.filter_by(
-         pipeline_stage_id=stage_id, instance=instance
+         pipeline_stage_id=stage_id, instance=INSTANCE
       ).filter_by(
           field_id=field_id
       ).join(
@@ -96,7 +99,7 @@ class Query(ObjectType):
    def resolve_processes_by_field_id_and_pipeline_id(self, info, pipeline_id, field_id=None):
       query = Processes.get_query(info)
       return query.filter_by(
-         instance=instance, flag_removed=False
+         instance=INSTANCE, flag_removed=False
       ).join(
          ProcessPipelineModel
       ).filter_by(
@@ -123,6 +126,14 @@ class Query(ObjectType):
          process_id=process_id
       ).order_by(
          ProcessComponentModel.module_id
+      )
+
+   def resolve_comments_by_process_id(self, info, process_id):
+      query = Comments.get_query(info)
+      return query.filter_by(
+         process_id=process_id
+      ).order_by(
+         CommentsModel.date
       )
 
    def resolve_process_by_process_id(self, info, process_id):

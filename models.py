@@ -406,3 +406,21 @@ class ProcessComponent(Base):
 
     module = relationship('Modules')
     process = relationship('Processes')
+
+
+class Comments(Base):
+    __tablename__ = 'comments'
+
+    seq = Sequence('comments_comment_id_seq', metadata=Base.metadata)
+
+    comment_id = Column(Integer, seq, primary_key=True)
+    comments = Column(Text, nullable=False)
+    process_id = Column(ForeignKey('processes.process_id', ondelete='CASCADE'))
+    date = Column(DateTime, nullable=False)
+    user_id = Column(ForeignKey('tg_user.user_id'), nullable=False)
+    hid = Column(Float)
+    hid_title = Column(Text)
+
+    process = relationship('Processes')
+    user = relationship('TgUser')
+
