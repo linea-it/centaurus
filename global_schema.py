@@ -1,7 +1,6 @@
-from sqlalchemy import or_
 from graphene_sqlalchemy import SQLAlchemyConnectionField
-from graphene import Schema, ObjectType, Field, List, String, Int
-from sqlalchemy import func, or_
+from graphene import Schema, ObjectType, Field, List, String, Int, Boolean, Enum, Argument
+from sqlalchemy.inspection import inspect
 from database import db_session
 
 from schemas.product_class import ProductClass
@@ -25,6 +24,7 @@ from schemas.session import Session
 from schemas.pipelines_execution import PipelinesExecution
 from schemas.job_runs import JobRuns
 from schemas.comments import Comments
+from schemas.saved_processes import SavedProcesses
 
 from models import (
    ProductClass as ProductClassModel,
@@ -37,7 +37,8 @@ from models import (
    Products as ProductsModel,
    ProcessComponent as ProcessComponentModel,
    Fields as FieldsModel,
-   Comments as CommentsModel
+   Comments as CommentsModel,
+   SavedProcesses as SavedProcessesModel
 )
 
 from views import PipelinesExecution as PipelinesExecutionModel
@@ -47,19 +48,51 @@ import os
 INSTANCE = os.getenv('API_INSTANCE')
 
 
+def sort_enum_for(cls):
+   """Create Graphene Enum for sorting a SQLAlchemy class query"""
+
+   name = cls.__name__+'SortEnum' 
+   items = list()
+
+   for attr in inspect(cls).attrs:
+      try:
+         asc = attr.expression
+         desc = asc.desc()
+      except AttributeError as error:
+         pass
+      else:
+         key = attr.key.lower()
+         items.extend([(key + '_asc', asc), (key + '_desc', desc)])
+
+   return Enum(name, items)
+
+
 class Query(ObjectType):
    """Query objects for GraphQL API"""
 
    # gets all entries
    product_class_list = SQLAlchemyConnectionField(ProductClass)
    pipelines_list = SQLAlchemyConnectionField(Pipelines)
-   processes_list = SQLAlchemyConnectionField(Processes)
    modules_list = SQLAlchemyConnectionField(Modules)
    group_pypelines_list = SQLAlchemyConnectionField(GroupPypelines)
    pipelines_modules_list = SQLAlchemyConnectionField(PipelinesModules)
    release_tag_list = SQLAlchemyConnectionField(ReleaseTag)
    fields_list = SQLAlchemyConnectionField(Fields)
    pipeline_stage_list = SQLAlchemyConnectionField(PipelineStage)
+
+   # gets list by filters
+   processes_list = SQLAlchemyConnectionField(
+      Processes,
+      all_instances=Boolean(),
+      running=Boolean(),
+      published=Boolean(),
+      saved=Boolean(),
+      sort=Argument(List(sort_enum_for(ProcessesModel))),
+      before=String(),
+      after=String(),
+      first=Int(),
+      last=Int()
+   )
 
    # gets by field unique
    product_class_by_class_name = Field(lambda: ProductClass, name=String())
@@ -143,6 +176,33 @@ class Query(ObjectType):
       ).order_by(
          ProcessesModel.process_id
       ).one_or_none()
+
+   def resolve_processes_list(self, info, all_instances=None, running=None,
+      published=None, saved=None,sort=list(), **args):
+      query = Processes.get_query(info)
+      query = query.filter_by(flag_removed=False)
+
+      if not all_instances:
+         query = query.filter_by(instance=INSTANCE)
+
+      if running is True:
+         query = query.filter(ProcessesModel.end_time.is_(None))
+      elif running is False:
+         query = query.filter(ProcessesModel.end_time.isnot(None))
+
+      if published is True:
+         query = query.filter(ProcessesModel.published_date.isnot(None))
+      elif published is False:
+         query = query.filter(ProcessesModel.published_date.is_(None))
+
+      if saved is True:
+         query = query.join(SavedProcessesModel)
+      elif saved is False:
+         query = query.outerjoin(
+            SavedProcessesModel
+         ).filter(SavedProcessesModel.process_id.is_(None))
+
+      return query.order_by(*sort)
 
    def resolve_fields_by_tag_id(self, info, tag_id):
        query = Fields.get_query(info)

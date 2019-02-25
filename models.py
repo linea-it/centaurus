@@ -424,3 +424,13 @@ class Comments(Base):
     process = relationship('Processes')
     user = relationship('TgUser')
 
+
+class SavedProcesses(Processes):
+    __tablename__ = 'saved_processes'
+
+    process_id = Column(ForeignKey('processes.process_id', ondelete='CASCADE'), primary_key=True)
+    saved_date = Column(DateTime, nullable=False, server_default=text("now()"))
+    user_comments = Column(Text)
+    saved_date_end = Column(DateTime)
+    volume = Column(BigInteger)
+    number_files = Column(Integer)

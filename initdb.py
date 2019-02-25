@@ -13,7 +13,7 @@ from models import (
     Tables, TgUser, FileLocator, Modules, Pipelines, Session,
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
     Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
-    PipelinesModules, ProcessComponent, Comments
+    PipelinesModules, ProcessComponent, Comments, SavedProcesses
 )
 
 event.listen(
@@ -61,7 +61,7 @@ classes = [
     Tables, TgUser, FileLocator, Modules, Pipelines, Session,
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
     Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
-    PipelinesModules, ProcessComponent, Comments
+    PipelinesModules, ProcessComponent, Comments, SavedProcesses
 ]
 
 for item in classes:
