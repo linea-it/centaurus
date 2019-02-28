@@ -44,6 +44,7 @@ from models import (
 from views import PipelinesExecution as PipelinesExecutionModel
 
 import os
+import ast
 
 INSTANCE = os.getenv('API_INSTANCE')
 
@@ -87,6 +88,7 @@ class Query(ObjectType):
       running=Boolean(),
       published=Boolean(),
       saved=Boolean(),
+      search=String(),
       sort=Argument(List(sort_enum_for(ProcessesModel))),
       before=String(),
       after=String(),
@@ -178,7 +180,7 @@ class Query(ObjectType):
       ).one_or_none()
 
    def resolve_processes_list(self, info, all_instances=None, running=None,
-      published=None, saved=None,sort=list(), **args):
+      published=None, saved=None, search=None, sort=list(), **args):
       query = Processes.get_query(info)
       query = query.filter_by(flag_removed=False)
 
@@ -201,6 +203,13 @@ class Query(ObjectType):
          query = query.outerjoin(
             SavedProcessesModel
          ).filter(SavedProcessesModel.process_id.is_(None))
+
+      if search:
+         query = query.filter(
+            ProcessesModel.name.contains(search)
+            # (ProcessesModel.name.contains(search)) |
+            # (ProcessesModel.process_id.contains(int(search)))
+         )
 
       return query.order_by(*sort)
 
