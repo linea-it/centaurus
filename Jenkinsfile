@@ -33,7 +33,6 @@ pipeline {
                     sh 'docker push $registry:$GIT_COMMIT'
                     sh 'docker rmi $registry:$GIT_COMMIT'
                 }
-                sh "docker rmi $registry:$GIT_COMMIT"
                 sh """
                   curl -D - -X \"POST\" \
                     -H \"content-type: application/json\" \
