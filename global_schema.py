@@ -25,8 +25,10 @@ from schemas.pipelines_execution import PipelinesExecution
 from schemas.job_runs import JobRuns
 from schemas.comments import Comments
 from schemas.saved_processes import SavedProcesses
+from schemas.mask import Mask
 
 from models import (
+   ProductType as ProductTypeModel,
    ProductClass as ProductClassModel,
    Pipelines as PipelinesModel,
    PipelineStatus as PipelineStatusModel,
@@ -38,7 +40,10 @@ from models import (
    ProcessComponent as ProcessComponentModel,
    Fields as FieldsModel,
    Comments as CommentsModel,
-   SavedProcesses as SavedProcessesModel
+   SavedProcesses as SavedProcessesModel,
+   Mask as MaskModel,
+   Tables as TablesModel,
+   ReleaseTag as ReleaseTagModel,
 )
 
 from views import PipelinesExecution as PipelinesExecutionModel
@@ -79,6 +84,8 @@ class Query(ObjectType):
    release_tag_list = SQLAlchemyConnectionField(ReleaseTag)
    fields_list = SQLAlchemyConnectionField(Fields)
    pipeline_stage_list = SQLAlchemyConnectionField(PipelineStage)
+   product_type_list = SQLAlchemyConnectionField(ProductType)
+   mask_list = SQLAlchemyConnectionField(Mask)
 
    # gets list by filters
    processes_list = SQLAlchemyConnectionField(
@@ -88,6 +95,19 @@ class Query(ObjectType):
       published=Boolean(),
       saved=Boolean(),
       sort=Argument(List(sort_enum_for(ProcessesModel))),
+      before=String(),
+      after=String(),
+      first=Int(),
+      last=Int()
+   )
+
+   products_list = SQLAlchemyConnectionField(
+      Products,
+      release_name=String(),
+      field_name=String(),
+      type_name=String(),
+      class_name=String(),
+      band=String(),
       before=String(),
       after=String(),
       first=Int(),
@@ -178,7 +198,7 @@ class Query(ObjectType):
       ).one_or_none()
 
    def resolve_processes_list(self, info, all_instances=None, running=None,
-      published=None, saved=None,sort=list(), **args):
+      published=None, saved=None, sort=list(), **args):
       query = Processes.get_query(info)
       query = query.filter_by(flag_removed=False)
 
@@ -201,6 +221,40 @@ class Query(ObjectType):
          query = query.outerjoin(
             SavedProcessesModel
          ).filter(SavedProcessesModel.process_id.is_(None))
+
+      return query.order_by(*sort)
+
+   def resolve_products_list(self, info, release_name=None, field_name=None,
+      type_name=None, class_name=None, band=None, sort=list(), **args):
+      query = Products.get_query(info)
+
+      if release_name or field_name or band:
+         query = query.join(TablesModel)
+         query = query.join(MaskModel)
+
+      if release_name:
+         query = query.join(
+            ReleaseTagModel, MaskModel.tag_id == ReleaseTagModel.tag_id
+         ).filter(ReleaseTagModel.name == release_name)
+
+      if field_name:
+         query = query.join(
+            FieldsModel, MaskModel.field_id == FieldsModel.field_id
+         ).filter(FieldsModel.field_name == field_name)
+   
+      if band:
+         query = query.filter(MaskModel.filter == band)
+
+      if class_name or type_name:
+         query = query.join(ProductClassModel)
+
+      if class_name:
+         query = query.filter(ProductClassModel.class_name == class_name)
+
+      if type_name:
+         query = query.join(
+            ProductTypeModel
+         ).filter(ProductTypeModel.type_name == type_name)
 
       return query.order_by(*sort)
 

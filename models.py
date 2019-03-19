@@ -434,3 +434,17 @@ class SavedProcesses(Processes):
     saved_date_end = Column(DateTime)
     volume = Column(BigInteger)
     number_files = Column(Integer)
+
+
+class Mask(Base):
+    __tablename__ = 'mask'
+
+    seq = Sequence('mask_mask_id_seq', metadata=Base.metadata)
+
+    mask_id = Column(Integer, seq, primary_key=True)
+    filter = Column(String(1), nullable=False)
+    date = Column(DateTime, nullable=False)
+    flag_removed = Column(Boolean, nullable=False, server_default=text("false"))
+    tag_id = Column(ForeignKey('coadd.release_tag.tag_id'))
+    field_id = Column(ForeignKey('coadd.fields.field_id'))
+    table_id = Column(ForeignKey('tables.table_id', ondelete='CASCADE'), nullable=False)
