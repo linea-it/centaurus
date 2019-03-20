@@ -1,6 +1,7 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
 from graphene import Schema, ObjectType, Field, List, String, Int, Boolean, Enum, Argument
 from sqlalchemy.inspection import inspect
+from sqlalchemy import or_
 from database import db_session
 
 from schemas.product_class import ProductClass
@@ -108,6 +109,7 @@ class Query(ObjectType):
       type_name=String(),
       class_name=String(),
       band=String(),
+      filter=String(),
       before=String(),
       after=String(),
       first=Int(),
@@ -225,36 +227,37 @@ class Query(ObjectType):
       return query.order_by(*sort)
 
    def resolve_products_list(self, info, release_name=None, field_name=None,
-      type_name=None, class_name=None, band=None, sort=list(), **args):
+      type_name=None, class_name=None, band=None, filter=None, sort=list(),
+      **args):
       query = Products.get_query(info)
-
-      if release_name or field_name or band:
-         query = query.join(TablesModel)
-         query = query.join(MaskModel)
+      query = query.join(TablesModel)
+      query = query.join(MaskModel)
+      query = query.join(
+         ReleaseTagModel, MaskModel.tag_id == ReleaseTagModel.tag_id)
+      query = query.join(
+         FieldsModel, MaskModel.field_id == FieldsModel.field_id)
+      query = query.join(ProductClassModel)
+      query = query.join(ProductTypeModel)
 
       if release_name:
-         query = query.join(
-            ReleaseTagModel, MaskModel.tag_id == ReleaseTagModel.tag_id
-         ).filter(ReleaseTagModel.name == release_name)
-
+         query = query.filter(ReleaseTagModel.name == release_name)
       if field_name:
-         query = query.join(
-            FieldsModel, MaskModel.field_id == FieldsModel.field_id
-         ).filter(FieldsModel.field_name == field_name)
-   
+         query = query.filter(FieldsModel.field_name == field_name)
       if band:
          query = query.filter(MaskModel.filter == band)
-
-      if class_name or type_name:
-         query = query.join(ProductClassModel)
-
       if class_name:
          query = query.filter(ProductClassModel.class_name == class_name)
-
       if type_name:
-         query = query.join(
-            ProductTypeModel
-         ).filter(ProductTypeModel.type_name == type_name)
+         query = query.filter(ProductTypeModel.type_name == type_name)
+
+      if filter:
+         _columns = [
+            ReleaseTagModel.name, FieldsModel.field_name, MaskModel.filter,
+            ProductClassModel.class_name, ProductTypeModel.type_name
+         ]
+
+         _filters = [column.like("%{0}%".format(filter)) for column in _columns]
+         query = query.filter(or_(*_filters))
 
       return query.order_by(*sort)
 
