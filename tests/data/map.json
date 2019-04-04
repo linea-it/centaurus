@@ -1,0 +1,32 @@
+[
+    {
+        "map_id":9809,
+        "tag_id":33,
+        "nside":4096,
+        "filter":"",
+        "date":"2019-03-22T10:16:00",
+        "flag_removed":false,
+        "ordering":"ring",
+        "field_id":64,
+        "table_id":13915,
+        "image":null,
+        "snr":null,
+        "type":null,
+        "magnitude":null
+    },
+    {
+        "map_id":9808,
+        "tag_id":33,
+        "nside":4096,
+        "filter":"g",
+        "date":"2019-03-22T09:42:00",
+        "flag_removed":false,
+        "ordering":"ring",
+        "field_id":64,
+        "table_id":13913,
+        "image":null,
+        "snr":null,
+        "type":null,
+        "magnitude":null
+    }
+]

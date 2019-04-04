@@ -1,0 +1,32 @@
+[
+    {
+        "catalog_id":855,
+        "num_tiles":8,
+        "num_objects":313380,
+        "num_columns":587,
+        "visibility":1,
+        "catalog_name":"Y1A1 COSMOS D04",
+        "version":"1",
+        "ingestion_date":"2016-08-30T14:30:06.827053",
+        "user_id":133,
+        "description":"A subset of Y1A1_COADD coadds in the COSMOS field. Coadds built to depth of 4 tilings, consistent with Year 1 depth.",
+        "status_id":1,
+        "flag_removed":false,
+        "table_id":46
+    },
+    {
+        "catalog_id":893,
+        "num_tiles":334,
+        "num_objects":12487566,
+        "num_columns":587,
+        "visibility":1,
+        "catalog_name":"Y1A1 STRIPE82",
+        "version":"v1.6",
+        "ingestion_date":"2015-11-03T20:26:17.083609",
+        "user_id":374,
+        "description":"A subset of Y1A1_COADD coadds in the Stripe82 region.",
+        "status_id":1,
+        "flag_removed":false,
+        "table_id":399
+    }
+]

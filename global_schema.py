@@ -27,6 +27,9 @@ from schemas.job_runs import JobRuns
 from schemas.comments import Comments
 from schemas.saved_processes import SavedProcesses
 from schemas.mask import Mask
+from schemas.map import Map
+from schemas.catalog import Catalog
+from schemas.filters import Filters
 
 from models import (
    ProductType as ProductTypeModel,
@@ -43,8 +46,13 @@ from models import (
    Comments as CommentsModel,
    SavedProcesses as SavedProcessesModel,
    Mask as MaskModel,
-   Tables as TablesModel,
+   FileLocator as FileLocatorModel,
    ReleaseTag as ReleaseTagModel,
+   Map as MapModel,
+   CatalogStatus as CatalogStatusModel,
+   Catalog as CatalogModel,
+   Tables as TablesModel,
+   ProductField as ProductFieldModel
 )
 
 from views import PipelinesExecution as PipelinesExecutionModel
@@ -87,6 +95,9 @@ class Query(ObjectType):
    pipeline_stage_list = SQLAlchemyConnectionField(PipelineStage)
    product_type_list = SQLAlchemyConnectionField(ProductType)
    mask_list = SQLAlchemyConnectionField(Mask)
+   map_list = SQLAlchemyConnectionField(Map)
+   catalog_list = SQLAlchemyConnectionField(Catalog)
+   filters_list = SQLAlchemyConnectionField(Filters)
 
    # gets list by filters
    processes_list = SQLAlchemyConnectionField(
@@ -104,10 +115,10 @@ class Query(ObjectType):
 
    products_list = SQLAlchemyConnectionField(
       Products,
-      release_name=String(),
-      field_name=String(),
-      type_name=String(),
-      class_name=String(),
+      tag_id=Int(),
+      field_id=Int(),
+      type_id=Int(),
+      class_id=Int(),
       band=String(),
       filter=String(),
       before=String(),
@@ -122,13 +133,15 @@ class Query(ObjectType):
    modules_by_name = Field(lambda: Modules, name=String())
    process_by_process_id = Field(lambda: Processes, process_id=Int())
 
-   # gets list by id 
+   # gets list by unique field
    fields_by_tag_id = List(lambda: Fields, tag_id=Int())
    pipelines_by_field_id_and_stage_id = List(lambda: PipelinesExecution, stage_id=Int(), field_id=Int())
    processes_by_field_id_and_pipeline_id = List(lambda: Processes, field_id=Int(), pipeline_id=Int())
    products_by_process_id = List(lambda: Products, process_id=Int())
    process_components_by_process_id = List(lambda: ProcessComponent, process_id=Int())
    comments_by_process_id = List(lambda: Comments, process_id=Int())
+   fields_by_tagname = List(lambda: Fields, tagname=String())
+   product_class_by_type_name = List(lambda: ProductClass, name=String())
 
    def resolve_pipelines_by_field_id_and_stage_id(self, info, stage_id, field_id=None):
       query = PipelinesExecution.get_query(info)
@@ -226,34 +239,41 @@ class Query(ObjectType):
 
       return query.order_by(*sort)
 
-   def resolve_products_list(self, info, release_name=None, field_name=None,
-      type_name=None, class_name=None, band=None, filter=None, sort=list(),
-      **args):
+   def resolve_products_list(self, info, tag_id=None, field_id=None,
+      type_id=None, class_id=None, band=None, filter=None, sort=list(), **args):
       query = Products.get_query(info)
-      query = query.join(TablesModel)
-      query = query.join(MaskModel)
-      query = query.join(
-         ReleaseTagModel, MaskModel.tag_id == ReleaseTagModel.tag_id)
-      query = query.join(
-         FieldsModel, MaskModel.field_id == FieldsModel.field_id)
+      query = query.join(ProductFieldModel)
+      query = query.outerjoin(TablesModel)
+      query = query.join(ProcessesModel)
+      query = query.filter(ProcessesModel.flag_removed == False)
+      query = query.outerjoin(
+         MaskModel, MaskModel.table_id == TablesModel.table_id)
+      query = query.outerjoin(
+         MapModel, MapModel.table_id == TablesModel.table_id)
+      query = query.outerjoin(
+         FieldsModel, ProductFieldModel.field_id == FieldsModel.field_id)
+      query = query.outerjoin(
+         ReleaseTagModel, FieldsModel.release_tag_id == ReleaseTagModel.tag_id)
       query = query.join(ProductClassModel)
       query = query.join(ProductTypeModel)
 
-      if release_name:
-         query = query.filter(ReleaseTagModel.name == release_name)
-      if field_name:
-         query = query.filter(FieldsModel.field_name == field_name)
+      if tag_id:
+         query = query.filter(ReleaseTagModel.tag_id == tag_id)
+      if field_id:
+         query = query.filter(FieldsModel.field_id == field_id)
       if band:
-         query = query.filter(MaskModel.filter == band)
-      if class_name:
-         query = query.filter(ProductClassModel.class_name == class_name)
-      if type_name:
-         query = query.filter(ProductTypeModel.type_name == type_name)
+         query = query.filter(or_(MaskModel.filter == band, MapModel.filter == band))
+      if class_id:
+         query = query.filter(ProductClassModel.class_id == class_id)
+      if type_id:
+         query = query.filter(ProductTypeModel.type_id == type_id)
 
       if filter:
          _columns = [
-            ReleaseTagModel.name, FieldsModel.field_name, MaskModel.filter,
-            ProductClassModel.class_name, ProductTypeModel.type_name
+            ReleaseTagModel.name, FieldsModel.field_name,
+            ProductsModel.display_name,
+            ProductClassModel.class_name, ProductTypeModel.type_name,
+            MapModel.filter, MaskModel.filter
          ]
 
          _filters = [column.like("%{0}%".format(filter)) for column in _columns]
@@ -265,9 +285,19 @@ class Query(ObjectType):
        query = Fields.get_query(info)
        return query.filter(FieldsModel.release_tag_id == tag_id)
 
+   def resolve_fields_by_tagname(self, info, tagname):
+       query = Fields.get_query(info)
+       query = query.join(ReleaseTagModel)
+       return query.filter(ReleaseTagModel.name == tagname)
+
    def resolve_product_class_by_class_name(self, info, name):
        query = ProductClass.get_query(info)
        return query.filter(ProductClassModel.class_name == name).one_or_none()
+
+   def resolve_product_class_by_type_name(self, info, name):
+       query = ProductClass.get_query(info)
+       query = query.join(ProductTypeModel)
+       return query.filter(ProductTypeModel.type_name == name)
 
    def resolve_pipelines_by_name(self, info, name):
         query = Pipelines.get_query(info)

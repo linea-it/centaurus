@@ -13,12 +13,16 @@ from models import (
     Tables, TgUser, FileLocator, Modules, Pipelines, Session,
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
     Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
-    PipelinesModules, ProcessComponent, Comments, Mask, SavedProcesses
+    PipelinesModules, ProcessComponent, Comments, Mask, Map,
+    CatalogStatus, Catalog, SavedProcesses, ProductField, Filters
 )
 
 event.listen(
     Base.metadata, 'before_create',
-    DDL("CREATE SCHEMA IF NOT EXISTS coadd")
+    DDL(
+        "CREATE SCHEMA IF NOT EXISTS coadd; "
+        "CREATE SCHEMA IF NOT EXISTS filters"
+    )
 )
 
 
@@ -61,7 +65,8 @@ classes = [
     Tables, TgUser, FileLocator, Modules, Pipelines, Session,
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
     Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
-    PipelinesModules, ProcessComponent, Comments, Mask, SavedProcesses
+    PipelinesModules, ProcessComponent, Comments, Mask, Map,
+    CatalogStatus, Catalog, SavedProcesses, ProductField, Filters
 ]
 
 for item in classes:

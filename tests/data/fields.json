@@ -20,5 +20,16 @@
     "release_tag_id": 24,
     "start_date": "2015-11-03",
     "status": true
+  },
+  {
+    "discovery_date": "2018-08-27",
+    "display_name": "Y3 Gold Small",
+    "field_id": 64,
+    "field_name": "Y3_GOLD",
+    "install_date": "2018-08-27",
+    "release_date": "2018-08-27",
+    "release_tag_id": 24,
+    "start_date": "2018-08-27",
+    "status": true
   }
 ]

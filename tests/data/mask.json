@@ -1,20 +1,11 @@
 [
   {
-    "mask_id": 1,
-    "filter": "g",
+    "mask_id": 51,
+    "filter": "",
     "date": "2019-03-18",
     "flag_removed": false,
     "tag_id": 24,
     "field_id": 47,
-    "table_id": 46
-  },
-  {
-    "mask_id": 2,
-    "filter": "r",
-    "date": "2019-03-18",
-    "flag_removed": false,
-    "tag_id": 24,
-    "field_id": 40,
-    "table_id": 399
+    "table_id": 13101
   }
 ]

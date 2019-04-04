@@ -1,0 +1,10 @@
+[
+    {"id":"0","filter":"u","lambda_min":300,"lambda_max":409,"lambda_mean":354.5},
+    {"id":"1","filter":"g","lambda_min":391,"lambda_max":557,"lambda_mean":474},
+    {"id":"2","filter":"r","lambda_min":558,"lambda_max":733,"lambda_mean":645.5},
+    {"id":"3","filter":"i","lambda_min":682,"lambda_max":885,"lambda_mean":783.5},
+    {"id":"4","filter":"z","lambda_min":826,"lambda_max":1026,"lambda_mean":926},
+    {"id":"5","filter":"Y","lambda_min":926,"lambda_max":1090,"lambda_mean":1008},
+    {"id":"6","filter":"griz","lambda_min":391,"lambda_max":1026,"lambda_mean":1026},
+    {"id":"7","filter":"grizY","lambda_min":391,"lambda_max":1090,"lambda_mean":1090}
+]

@@ -3,13 +3,11 @@
 from database import Base, engine
 from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, Column, DateTime, Date, 
-    Integer, String, Text, UniqueConstraint, text, Sequence, Float,
-    Table, ForeignKey
+    SmallInteger, Integer, String, Text, text, Sequence, Float,
+    Table, ForeignKey, UniqueConstraint
 )
 from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, backref
-
-metadata = Base.metadata
 
 
 class ProductType(Base):
@@ -111,6 +109,10 @@ class Tables(Base):
     table_id = Column(Integer, seq, primary_key=True)
     schema_name = Column(String(128), nullable=False)
     table_name = Column(String(128), nullable=False)
+
+    map = relationship('Map', uselist=False, primaryjoin="Map.table_id == Tables.table_id")
+    mask = relationship('Mask', uselist=False, primaryjoin="Mask.table_id == Tables.table_id")
+    catalog = relationship('Catalog', uselist=False, primaryjoin="Catalog.table_id == Tables.table_id")
 
 
 class TgUser(Base):
@@ -425,7 +427,7 @@ class Comments(Base):
     user = relationship('TgUser')
 
 
-class SavedProcesses(Processes):
+class SavedProcesses(Base):
     __tablename__ = 'saved_processes'
 
     process_id = Column(ForeignKey('processes.process_id', ondelete='CASCADE'), primary_key=True)
@@ -448,3 +450,84 @@ class Mask(Base):
     tag_id = Column(ForeignKey('coadd.release_tag.tag_id'))
     field_id = Column(ForeignKey('coadd.fields.field_id'))
     table_id = Column(ForeignKey('tables.table_id', ondelete='CASCADE'), nullable=False)
+
+    table = relationship('Tables')
+    tag = relationship('ReleaseTag')
+    field = relationship('Fields')
+
+
+class CatalogStatus(Base):
+    __tablename__ = 'catalog_status'
+
+    seq = Sequence('catalog_status_status_id_seq', metadata=Base.metadata)
+
+    status_id = Column(Integer, seq, primary_key=True)
+    name = Column(String(16), nullable=False, unique=True)
+    description = Column(String(64), nullable=False)
+
+
+class Map(Base):
+    __tablename__ = 'map'
+
+    seq = Sequence('map_map_id_seq', metadata=Base.metadata)
+
+    map_id = Column(Integer, seq, primary_key=True)
+    tag_id = Column(ForeignKey('coadd.release_tag.tag_id'))
+    nside = Column(Integer)
+    filter = Column(String(10))
+    date = Column(DateTime)
+    flag_removed = Column(Boolean, server_default=text("false"))
+    ordering = Column(String(8), nullable=False)
+    field_id = Column(Integer)
+    table_id = Column(ForeignKey('tables.table_id', ondelete='CASCADE'), nullable=False)
+    image = Column(String(256))
+    snr = Column(Integer)
+    type = Column(String(54))
+    magnitude = Column(String(54))
+
+    table = relationship('Tables')
+    tag = relationship('ReleaseTag')
+
+
+class Catalog(Base):
+    __tablename__ = 'catalog'
+
+    seq = Sequence('catalog_catalog_id_seq', metadata=Base.metadata)
+
+    catalog_id = Column(Integer, seq, primary_key=True)
+    num_tiles = Column(Integer, nullable=False)
+    num_objects = Column(BigInteger, nullable=False)
+    num_columns = Column(Integer, nullable=False)
+    visibility = Column(SmallInteger, nullable=False)
+    catalog_name = Column(String(128))
+    version = Column(String(128))
+    ingestion_date = Column(DateTime)
+    user_id = Column(Integer)
+    description = Column(Text)
+    status_id = Column(ForeignKey('catalog_status.status_id'), nullable=False)
+    flag_removed = Column(Boolean, server_default=text("false"))
+    table_id = Column(ForeignKey('tables.table_id', ondelete='CASCADE'), nullable=False)
+
+    status = relationship('CatalogStatus')
+    table = relationship('Tables')
+
+
+class ProductField(Base):
+    __tablename__ = 'product_field'
+
+    field_id = Column(ForeignKey('coadd.fields.field_id'), primary_key=True, nullable=False)
+    product_id = Column(ForeignKey('products.product_id'), primary_key=True, nullable=False)
+
+    fields = relationship('Fields', backref=backref("coadd.fields"))
+    products = relationship('Products', backref=backref("products"))
+
+
+class Filters(Base):
+    __tablename__ = 'des'
+    __table_args__ = {'schema': 'filters'}
+
+    id = Column(Text, nullable=False)
+    filter = Column(Text, primary_key=True, nullable=False)
+    lambda_min = Column(Float)
+    lambda_max = Column(Float)
+    lambda_mean = Column(Float)

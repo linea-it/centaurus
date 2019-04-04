@@ -1,0 +1,22 @@
+[
+    {
+        "status_id":1,
+        "name":"valid",
+        "description":"Ok"
+    },
+    {
+        "status_id":2,
+        "name":"pending",
+        "description":"Pending"
+    },
+    {
+        "status_id":3,
+        "name":"warning",
+        "description":"Warning"
+    },
+    {
+        "status_id":4,
+        "name":"invalid",
+        "description":"Do not use"    
+    }
+]

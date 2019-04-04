@@ -8,5 +8,20 @@
     "schema_name": "y1a1_coadd_stripe82",
     "table_id": 399,
     "table_name": "coadd_objects"
+  },
+  {
+    "schema_name": "vac_catalog_y3",
+    "table_id": 13913,
+    "table_name": "footprint_map_pos_10033729"
+  },
+  {
+    "schema_name": "vac_catalog_y3",
+    "table_id": 13915,
+    "table_name": "footprint_map_pos_10033730"
+  },
+  {
+    "schema_name": "y1a1_coadd_cosmos_d04",
+    "table_id": 13101,
+    "table_name": "coadd_objects_molygon_10030878"
   }
 ]

@@ -7,5 +7,14 @@
     "release_display_name": "Y1A1",
     "tag_id": 24,
     "version": "v1.6"
+  },
+  {
+    "description": "The third year of the Dark Energy Survey released by the DES collaboration, revision 1",
+    "doc_url": "https://opensource.ncsa.illinois.edu/confluence/display/DESDM/Y3A2%28Preliminary%29+Release+Notes",
+    "name": "Y3A2_COADD",
+    "release_date": "2017-06-22",
+    "release_display_name": "Y3A2",
+    "tag_id": 33,
+    "version": "v3.1"
   }
 ]

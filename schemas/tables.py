@@ -1,5 +1,8 @@
-from graphene import String, Int, DateTime, relay
+from graphene import String, Int, Field, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
+from schemas.catalog import Catalog
+from schemas.map import Map
+from schemas.mask import Mask
 
 from models import (
     Tables as TablesModel
@@ -14,7 +17,9 @@ class TablesAttribute():
     schema_name = String()
     table_name = String()
     dachs_url = String()
-
+    catalog = Field(lambda: Catalog)
+    mask = Field(lambda: Mask)
+    map = Field(lambda: Map)
 
 class Tables(SQLAlchemyObjectType, TablesAttribute):
     """Tables node"""
