@@ -1,5 +1,6 @@
 from graphene import Int, String, Boolean, Field, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
+from utils import Connection
 
 from models import (
     Products as ProductsModel
@@ -25,6 +26,8 @@ class Products(SQLAlchemyObjectType, ProductsAttribute):
     class Meta:
         model = ProductsModel
         interfaces = (relay.Node,)
+        connection_class = Connection
+
 
     def resolve_data_type(self, info):
         """ Returns data type of the product """

@@ -7,7 +7,7 @@ from sqlalchemy import (
     Table, ForeignKey, UniqueConstraint
 )
 from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, deferred
 
 
 class ProductType(Base):
@@ -216,7 +216,7 @@ class Processes(Base):
     seq = Sequence('processes_process_id_seq', metadata=Base.metadata)
 
     process_id = Column(Integer, seq, primary_key=True)
-    xml_config = Column(Text)
+    xml_config = deferred(Column(Text))
     session_id = Column(ForeignKey('session.session_id'), nullable=False)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
@@ -226,7 +226,7 @@ class Processes(Base):
     process_dir = Column(String(64))
     expiration_time = Column(DateTime)
     id_site = Column(ForeignKey('processing_site.id_site'), server_default=text("1"))
-    pype_input = Column(Text)
+    pype_input = deferred(Column(Text))
     comments = Column(Text)
     start_ingestion = Column(DateTime)
     end_ingestion = Column(DateTime)

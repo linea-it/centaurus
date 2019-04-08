@@ -1,8 +1,8 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
 from graphene import Schema, ObjectType, Field, List, String, Int, Boolean, Enum, Argument
-from sqlalchemy.inspection import inspect
 from sqlalchemy import or_
 from database import db_session
+from utils import sort_enum_for
 
 from schemas.product_class import ProductClass
 from schemas.product_type import ProductType
@@ -52,7 +52,10 @@ from models import (
    CatalogStatus as CatalogStatusModel,
    Catalog as CatalogModel,
    Tables as TablesModel,
-   ProductField as ProductFieldModel
+   ProductField as ProductFieldModel,
+   ProcessStatus as ProcessStatusModel,
+   TgUser as TgUserModel,
+   Session as SessionModel
 )
 
 from views import PipelinesExecution as PipelinesExecutionModel
@@ -60,25 +63,6 @@ from views import PipelinesExecution as PipelinesExecutionModel
 import os
 
 INSTANCE = os.getenv('API_INSTANCE')
-
-
-def sort_enum_for(cls):
-   """Create Graphene Enum for sorting a SQLAlchemy class query"""
-
-   name = cls.__name__+'SortEnum' 
-   items = list()
-
-   for attr in inspect(cls).attrs:
-      try:
-         asc = attr.expression
-         desc = asc.desc()
-      except AttributeError as error:
-         pass
-      else:
-         key = attr.key.lower()
-         items.extend([(key + '_asc', asc), (key + '_desc', desc)])
-
-   return Enum(name, items)
 
 
 class Query(ObjectType):
@@ -107,6 +91,7 @@ class Query(ObjectType):
       published=Boolean(),
       saved=Boolean(),
       sort=Argument(List(sort_enum_for(ProcessesModel))),
+      search=String(),
       before=String(),
       after=String(),
       first=Int(),
@@ -141,7 +126,7 @@ class Query(ObjectType):
    process_components_by_process_id = List(lambda: ProcessComponent, process_id=Int())
    comments_by_process_id = List(lambda: Comments, process_id=Int())
    fields_by_tagname = List(lambda: Fields, tagname=String())
-   product_class_by_type_name = List(lambda: ProductClass, name=String())
+   product_class_by_type_id = List(lambda: ProductClass, type_id=Int())
 
    def resolve_pipelines_by_field_id_and_stage_id(self, info, stage_id, field_id=None):
       query = PipelinesExecution.get_query(info)
@@ -213,9 +198,8 @@ class Query(ObjectType):
       ).one_or_none()
 
    def resolve_processes_list(self, info, all_instances=None, running=None,
-      published=None, saved=None, sort=list(), **args):
-      query = Processes.get_query(info)
-      query = query.filter_by(flag_removed=False)
+      published=None, saved=None, sort=list(), search=None, **args):
+      query = Processes.get_query(info).filter_by(flag_removed=False)
 
       if not all_instances:
          query = query.filter_by(instance=INSTANCE)
@@ -236,6 +220,23 @@ class Query(ObjectType):
          query = query.outerjoin(
             SavedProcessesModel
          ).filter(SavedProcessesModel.process_id.is_(None))
+
+      query = query.join(ProcessStatusModel)
+      query = query.outerjoin(ProcessFieldsModel).outerjoin(FieldsModel)
+      query = query.outerjoin(ReleaseTagModel)
+      query = query.join(SessionModel).join(TgUserModel)
+
+      if search:
+         _columns = [
+            ProcessesModel.name,
+            ProcessStatusModel.display_name,
+            FieldsModel.display_name,
+            ReleaseTagModel.release_display_name,
+            TgUserModel.display_name
+         ]
+
+         _filters = [column.like("%{}%".format(search)) for column in _columns]
+         query = query.filter(or_(*_filters))
 
       return query.order_by(*sort)
 
@@ -294,10 +295,10 @@ class Query(ObjectType):
        query = ProductClass.get_query(info)
        return query.filter(ProductClassModel.class_name == name).one_or_none()
 
-   def resolve_product_class_by_type_name(self, info, name):
+   def resolve_product_class_by_type_id(self, info, type_id):
        query = ProductClass.get_query(info)
        query = query.join(ProductTypeModel)
-       return query.filter(ProductTypeModel.type_name == name)
+       return query.filter(ProductTypeModel.type_id == type_id)
 
    def resolve_pipelines_by_name(self, info, name):
         query = Pipelines.get_query(info)
