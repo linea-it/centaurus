@@ -247,6 +247,7 @@ class Processes(Base):
     fields = relationship('Fields', secondary='coadd.process_fields')
     inputs = relationship('Products', secondary='process_inputs')
     products = relationship('Products')
+    saved_processes = relationship('SavedProcesses', uselist=False, backref=backref("processes"))
 
 
 class ProcessPipeline(Base):
