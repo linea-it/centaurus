@@ -1,7 +1,28 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import os
+
+from sqlalchemy.engine import Engine
+import time
+import logging
+
+logging.basicConfig()
+logger = logging.getLogger("centarus")
+logger.setLevel(logging.DEBUG)
+
+@event.listens_for(Engine, "before_cursor_execute")
+def before_cursor_execute(conn, cursor, statement,
+                        parameters, context, executemany):
+    conn.info.setdefault('query_start_time', []).append(time.time())
+    logger.debug("-" * 40)
+    logger.debug("START query: %s", statement)
+
+@event.listens_for(Engine, "after_cursor_execute")
+def after_cursor_execute(conn, cursor, statement,
+                        parameters, context, executemany):
+    total = time.time() - conn.info['query_start_time'].pop(-1)
+    logger.debug("END query ~ runtime: %f", total)
 
 port = os.environ.get('DB_PORT')
 host = os.environ.get('DB_HOST')

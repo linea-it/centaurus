@@ -1,8 +1,8 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
 from graphene import Schema, ObjectType, Field, List, String, Int, Boolean, Enum, Argument
-from sqlalchemy.inspection import inspect
 from sqlalchemy import or_
 from database import db_session
+from utils import sort_enum_for
 
 from schemas.product_class import ProductClass
 from schemas.product_type import ProductType
@@ -31,54 +31,12 @@ from schemas.map import Map
 from schemas.catalog import Catalog
 from schemas.filters import Filters
 
-from models import (
-   ProductType as ProductTypeModel,
-   ProductClass as ProductClassModel,
-   Pipelines as PipelinesModel,
-   PipelineStatus as PipelineStatusModel,
-   ProcessPipeline as ProcessPipelineModel,
-   Modules as ModulesModel,
-   Processes as ProcessesModel,
-   ProcessFields as ProcessFieldsModel,
-   Products as ProductsModel,
-   ProcessComponent as ProcessComponentModel,
-   Fields as FieldsModel,
-   Comments as CommentsModel,
-   SavedProcesses as SavedProcessesModel,
-   Mask as MaskModel,
-   FileLocator as FileLocatorModel,
-   ReleaseTag as ReleaseTagModel,
-   Map as MapModel,
-   CatalogStatus as CatalogStatusModel,
-   Catalog as CatalogModel,
-   Tables as TablesModel,
-   ProductField as ProductFieldModel
-)
-
-from views import PipelinesExecution as PipelinesExecutionModel
+import models
+import views
 
 import os
 
 INSTANCE = os.getenv('API_INSTANCE')
-
-
-def sort_enum_for(cls):
-   """Create Graphene Enum for sorting a SQLAlchemy class query"""
-
-   name = cls.__name__+'SortEnum' 
-   items = list()
-
-   for attr in inspect(cls).attrs:
-      try:
-         asc = attr.expression
-         desc = asc.desc()
-      except AttributeError as error:
-         pass
-      else:
-         key = attr.key.lower()
-         items.extend([(key + '_asc', asc), (key + '_desc', desc)])
-
-   return Enum(name, items)
 
 
 class Query(ObjectType):
@@ -106,7 +64,8 @@ class Query(ObjectType):
       running=Boolean(),
       published=Boolean(),
       saved=Boolean(),
-      sort=Argument(List(sort_enum_for(ProcessesModel))),
+      sort=Argument(List(sort_enum_for(models.Processes))),
+      search=String(),
       before=String(),
       after=String(),
       first=Int(),
@@ -120,6 +79,7 @@ class Query(ObjectType):
       type_id=Int(),
       class_id=Int(),
       band=String(),
+      sort=Argument(List(sort_enum_for(models.Products))),
       filter=String(),
       before=String(),
       after=String(),
@@ -141,7 +101,7 @@ class Query(ObjectType):
    process_components_by_process_id = List(lambda: ProcessComponent, process_id=Int())
    comments_by_process_id = List(lambda: Comments, process_id=Int())
    fields_by_tagname = List(lambda: Fields, tagname=String())
-   product_class_by_type_name = List(lambda: ProductClass, name=String())
+   product_class_by_type_id = List(lambda: ProductClass, type_id=Int())
 
    def resolve_pipelines_by_field_id_and_stage_id(self, info, stage_id, field_id=None):
       query = PipelinesExecution.get_query(info)
@@ -151,17 +111,17 @@ class Query(ObjectType):
       ).filter_by(
           field_id=field_id
       ).join(
-         PipelinesModel
+         models.Pipelines
       ).join(
-         PipelineStatusModel
+         models.PipelineStatus
       ).filter_by(
          name='enabled'
       ).join(
-         PipelinesModel.processes
+         models.Pipelines.processes
       ).filter_by(
          flag_removed=False
       ).order_by(
-         PipelinesExecutionModel.name
+         views.PipelinesExecution.name
       )
 
    def resolve_processes_by_field_id_and_pipeline_id(self, info, pipeline_id, field_id=None):
@@ -169,15 +129,15 @@ class Query(ObjectType):
       return query.filter_by(
          instance=INSTANCE, flag_removed=False
       ).join(
-         ProcessPipelineModel
+         models.ProcessPipeline
       ).filter_by(
          pipeline_id=pipeline_id
       ).outerjoin(
-         ProcessFieldsModel
+         models.ProcessFields
       ).filter_by(
          field_id=field_id
       ).order_by(
-         ProcessesModel.process_id.desc()
+         models.Processes.process_id.desc()
       )
 
    def resolve_products_by_process_id(self, info, process_id):
@@ -185,7 +145,7 @@ class Query(ObjectType):
       return query.filter_by(
          process_id=process_id
       ).order_by(
-         ProductsModel.product_id
+         models.Products.product_id
       )
 
    def resolve_process_components_by_process_id(self, info, process_id):
@@ -193,7 +153,7 @@ class Query(ObjectType):
       return query.filter_by(
          process_id=process_id
       ).order_by(
-         ProcessComponentModel.module_id
+         models.ProcessComponent.module_id
       )
 
    def resolve_comments_by_process_id(self, info, process_id):
@@ -201,7 +161,7 @@ class Query(ObjectType):
       return query.filter_by(
          process_id=process_id
       ).order_by(
-         CommentsModel.date
+         models.Comments.date
       )
 
    def resolve_process_by_process_id(self, info, process_id):
@@ -209,71 +169,87 @@ class Query(ObjectType):
       return query.filter_by(
          process_id=process_id
       ).order_by(
-         ProcessesModel.process_id
+         models.Processes.process_id
       ).one_or_none()
 
    def resolve_processes_list(self, info, all_instances=None, running=None,
-      published=None, saved=None, sort=list(), **args):
-      query = Processes.get_query(info)
-      query = query.filter_by(flag_removed=False)
+      published=None, saved=None, sort=list(), search=None, **args):
+      query = Processes.get_query(info).filter_by(flag_removed=False)
 
       if not all_instances:
          query = query.filter_by(instance=INSTANCE)
 
       if running is True:
-         query = query.filter(ProcessesModel.end_time.is_(None))
+         query = query.filter(models.Processes.end_time.is_(None))
       elif running is False:
-         query = query.filter(ProcessesModel.end_time.isnot(None))
+         query = query.filter(models.Processes.end_time.isnot(None))
 
       if published is True:
-         query = query.filter(ProcessesModel.published_date.isnot(None))
+         query = query.filter(models.Processes.published_date.isnot(None))
       elif published is False:
-         query = query.filter(ProcessesModel.published_date.is_(None))
+         query = query.filter(models.Processes.published_date.is_(None))
 
       if saved is True:
-         query = query.join(SavedProcessesModel)
+         query = query.join(models.SavedProcesses)
       elif saved is False:
          query = query.outerjoin(
-            SavedProcessesModel
-         ).filter(SavedProcessesModel.process_id.is_(None))
+            models.SavedProcesses
+         ).filter(models.SavedProcesses.process_id.is_(None))
+
+      query = query.join(models.ProcessStatus)
+      query = query.outerjoin(models.ProcessFields).outerjoin(models.Fields)
+      query = query.outerjoin(models.ReleaseTag)
+      query = query.join(models.Session).join(models.TgUser)
+
+      if search:
+         _columns = [
+            models.Processes.name,
+            models.ProcessStatus.display_name,
+            models.Fields.display_name,
+            models.ReleaseTag.release_display_name,
+            models.TgUser.display_name
+         ]
+
+         _filters = [column.like("%{}%".format(search)) for column in _columns]
+         query = query.filter(or_(*_filters))
 
       return query.order_by(*sort)
 
    def resolve_products_list(self, info, tag_id=None, field_id=None,
       type_id=None, class_id=None, band=None, filter=None, sort=list(), **args):
       query = Products.get_query(info)
-      query = query.join(ProductFieldModel)
-      query = query.outerjoin(TablesModel)
-      query = query.join(ProcessesModel)
-      query = query.filter(ProcessesModel.flag_removed == False)
+      query = query.join(models.ProductField)
+      query = query.outerjoin(models.Tables)
+      query = query.join(models.Processes)
+      query = query.filter(models.Processes.flag_removed == False)
       query = query.outerjoin(
-         MaskModel, MaskModel.table_id == TablesModel.table_id)
+         models.Mask, models.Mask.table_id == models.Tables.table_id)
       query = query.outerjoin(
-         MapModel, MapModel.table_id == TablesModel.table_id)
+         models.Map, models.Map.table_id == models.Tables.table_id)
       query = query.outerjoin(
-         FieldsModel, ProductFieldModel.field_id == FieldsModel.field_id)
+         models.Fields, models.ProductField.field_id == models.Fields.field_id)
       query = query.outerjoin(
-         ReleaseTagModel, FieldsModel.release_tag_id == ReleaseTagModel.tag_id)
-      query = query.join(ProductClassModel)
-      query = query.join(ProductTypeModel)
+         models.ReleaseTag, models.Fields.release_tag_id == models.ReleaseTag.tag_id)
+      query = query.join(models.ProductClass)
+      query = query.join(models.ProductType)
 
       if tag_id:
-         query = query.filter(ReleaseTagModel.tag_id == tag_id)
+         query = query.filter(models.ReleaseTag.tag_id == tag_id)
       if field_id:
-         query = query.filter(FieldsModel.field_id == field_id)
+         query = query.filter(models.Fields.field_id == field_id)
       if band:
-         query = query.filter(or_(MaskModel.filter == band, MapModel.filter == band))
+         query = query.filter(or_(models.Mask.filter == band, models.Map.filter == band))
       if class_id:
-         query = query.filter(ProductClassModel.class_id == class_id)
+         query = query.filter(models.ProductClass.class_id == class_id)
       if type_id:
-         query = query.filter(ProductTypeModel.type_id == type_id)
+         query = query.filter(models.ProductType.type_id == type_id)
 
       if filter:
          _columns = [
-            ReleaseTagModel.name, FieldsModel.field_name,
-            ProductsModel.display_name,
-            ProductClassModel.class_name, ProductTypeModel.type_name,
-            MapModel.filter, MaskModel.filter
+            models.ReleaseTag.name, models.Fields.field_name,
+            models.Products.display_name,
+            models.ProductClass.class_name, models.ProductType.type_name,
+            models.Map.filter, models.Mask.filter
          ]
 
          _filters = [column.like("%{0}%".format(filter)) for column in _columns]
@@ -283,28 +259,28 @@ class Query(ObjectType):
 
    def resolve_fields_by_tag_id(self, info, tag_id):
        query = Fields.get_query(info)
-       return query.filter(FieldsModel.release_tag_id == tag_id)
+       return query.filter(models.Fields.release_tag_id == tag_id)
 
    def resolve_fields_by_tagname(self, info, tagname):
        query = Fields.get_query(info)
-       query = query.join(ReleaseTagModel)
-       return query.filter(ReleaseTagModel.name == tagname)
+       query = query.join(models.ReleaseTag)
+       return query.filter(models.ReleaseTag.name == tagname)
 
    def resolve_product_class_by_class_name(self, info, name):
        query = ProductClass.get_query(info)
-       return query.filter(ProductClassModel.class_name == name).one_or_none()
+       return query.filter(models.ProductClass.class_name == name).one_or_none()
 
-   def resolve_product_class_by_type_name(self, info, name):
+   def resolve_product_class_by_type_id(self, info, type_id):
        query = ProductClass.get_query(info)
-       query = query.join(ProductTypeModel)
-       return query.filter(ProductTypeModel.type_name == name)
+       query = query.join(models.ProductType)
+       return query.filter(models.ProductType.type_id == type_id)
 
    def resolve_pipelines_by_name(self, info, name):
         query = Pipelines.get_query(info)
-        return query.filter(PipelinesModel.name == name).one_or_none()
+        return query.filter(models.Pipelines.name == name).one_or_none()
 
    def resolve_modules_by_name(self, info, name):
         query = Modules.get_query(info)
-        return query.filter(ModulesModel.name == name).one_or_none()
+        return query.filter(models.Modules.name == name).one_or_none()
 
 schema = Schema(query=Query)
