@@ -48,8 +48,6 @@ class Query(ObjectType):
    modules_list = SQLAlchemyConnectionField(Modules)
    group_pypelines_list = SQLAlchemyConnectionField(GroupPypelines)
    pipelines_modules_list = SQLAlchemyConnectionField(PipelinesModules)
-   release_tag_list = SQLAlchemyConnectionField(ReleaseTag)
-   fields_list = SQLAlchemyConnectionField(Fields)
    pipeline_stage_list = SQLAlchemyConnectionField(PipelineStage)
    product_type_list = SQLAlchemyConnectionField(ProductType)
    mask_list = SQLAlchemyConnectionField(Mask)
@@ -58,6 +56,14 @@ class Query(ObjectType):
    filters_list = SQLAlchemyConnectionField(Filters)
 
    # gets list by filters
+   release_tag_list = SQLAlchemyConnectionField(
+      ReleaseTag, only_available=Boolean()
+   )
+
+   fields_list = SQLAlchemyConnectionField(
+      Fields, only_available=Boolean()
+   )
+
    processes_list = SQLAlchemyConnectionField(
       Processes,
       all_instances=Boolean(),
@@ -94,7 +100,7 @@ class Query(ObjectType):
    process_by_process_id = Field(lambda: Processes, process_id=Int())
 
    # gets list by unique field
-   fields_by_tag_id = List(lambda: Fields, tag_id=Int())
+   fields_by_tag_id = List(lambda: Fields, tag_id=Int(), only_available=Boolean())
    pipelines_by_field_id_and_stage_id = List(lambda: PipelinesExecution, stage_id=Int(), field_id=Int())
    processes_by_field_id_and_pipeline_id = List(lambda: Processes, field_id=Int(), pipeline_id=Int())
    products_by_process_id = List(lambda: Products, process_id=Int())
@@ -171,6 +177,42 @@ class Query(ObjectType):
       ).order_by(
          models.Processes.process_id
       ).one_or_none()
+
+   def resolve_release_tag_list(self, info, only_available=True):
+      """ Returns available release list(default behavior)
+      
+      Arguments:
+          info -- is the resolver info.
+      
+      Keyword Arguments:
+          only_available {bool} -- if False returns all entries regardless 
+         of status. (default: {True})
+      """
+
+      query = ReleaseTag.get_query(info)
+      
+      if only_available:
+         query = query.join(models.Fields).filter_by(status=True)
+
+      return query
+
+   def resolve_fields_list(self, info, only_available=True):
+      """ Returns available field list (default behavior)
+      
+      Arguments:
+         info -- is the resolver info.
+      
+      Keyword Arguments:
+         only_available {bool} -- if False returns all entries regardless 
+         of status. (default: {True})
+      """
+
+      query = Fields.get_query(info)
+
+      if only_available:
+         query = query.filter_by(status=True)
+
+      return query
 
    def resolve_processes_list(self, info, all_instances=None, running=None,
       published=None, saved=None, sort=list(), search=None, **args):
@@ -257,9 +299,13 @@ class Query(ObjectType):
 
       return query.order_by(*sort)
 
-   def resolve_fields_by_tag_id(self, info, tag_id):
-       query = Fields.get_query(info)
-       return query.filter(models.Fields.release_tag_id == tag_id)
+   def resolve_fields_by_tag_id(self, info, tag_id, only_available=True):
+      query = Fields.get_query(info)
+
+      if only_available:
+         query = query.filter_by(status=True)
+
+      return query.filter(models.Fields.release_tag_id == tag_id)
 
    def resolve_fields_by_tagname(self, info, tagname):
        query = Fields.get_query(info)
