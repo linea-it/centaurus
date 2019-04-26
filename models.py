@@ -247,6 +247,7 @@ class Processes(Base):
     fields = relationship('Fields', secondary='coadd.process_fields')
     inputs = relationship('Products', secondary='process_inputs')
     products = relationship('Products')
+    process_comments = relationship('Comments')
     saved_processes = relationship('SavedProcesses', uselist=False, backref=backref("processes"))
 
 
@@ -337,6 +338,8 @@ class ReleaseTag(Base):
     description = Column(Text)
     doc_url = Column(Text)
     release_display_name = Column(String(60))
+
+    fields = relationship('Fields')
 
 
 class Fields(Base):

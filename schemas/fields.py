@@ -6,19 +6,19 @@ from models import Fields as FieldsModel
 
 class FieldsAttribute():
 
-    field_id = Int()
-    field_name = String()
-    display_name = String()
-    install_date = DateTime()
-    release_date = DateTime()
-    status = Boolean()
-    start_date = DateTime()
-    discovery_date = DateTime()
-    release_tag_id = Int()
+    field_id = Int(description='Field ID')
+    field_name = String(description='Field name')
+    display_name = String(description='Field ID')
+    install_date = DateTime(description='Instalation date')
+    release_date = DateTime(description='Release date')
+    status = Boolean(description='Field status: true = available / false = unavailable')
+    start_date = DateTime(description='Start date')
+    discovery_date = DateTime(description='Discovery date')
+    release_tag_id = Int(description='Release ID')
 
 
 class Fields(SQLAlchemyObjectType, FieldsAttribute):
-    """Release Tag node"""
+    """Fields node"""
 
     class Meta:
         model = FieldsModel

@@ -57,11 +57,24 @@ class Query(ObjectType):
 
    # gets list by filters
    release_tag_list = SQLAlchemyConnectionField(
-      ReleaseTag, only_available=Boolean()
+      ReleaseTag, 
+      only_available=Boolean(),
+      sort=Argument(List(sort_enum_for(models.ReleaseTag))),
+      search=String(),
+      before=String(),
+      after=String(),
+      first=Int(),
+      last=Int()
    )
 
    fields_list = SQLAlchemyConnectionField(
-      Fields, only_available=Boolean()
+      Fields, only_available=Boolean(),
+      sort=Argument(List(sort_enum_for(models.Fields))),
+      search=String(),
+      before=String(),
+      after=String(),
+      first=Int(),
+      last=Int()
    )
 
    processes_list = SQLAlchemyConnectionField(
@@ -178,25 +191,42 @@ class Query(ObjectType):
          models.Processes.process_id
       ).one_or_none()
 
-   def resolve_release_tag_list(self, info, only_available=True):
+   def resolve_release_tag_list(self, info, only_available=True, sort=list(),
+      search=None, **args):
       """ Returns available release list(default behavior)
       
       Arguments:
-          info -- is the resolver info.
+         info -- is the resolver info.
       
       Keyword Arguments:
-          only_available {bool} -- if False returns all entries regardless 
-         of status. (default: {True})
+         only_available {bool} -- if False returns all entries regardless 
+            of status. (default: {True})
+         sort {list} -- columns list to sorting. e.g.: ["name_asc"]
+
       """
 
       query = ReleaseTag.get_query(info)
       
+      _columns = [
+         models.ReleaseTag.release_display_name,
+         models.ReleaseTag.name
+      ]
+
       if only_available:
          query = query.join(models.Fields).filter_by(status=True)
+         _columns += [
+            models.Fields.display_name,
+            models.Fields.field_name
+         ]
 
-      return query
+      if search:
+         _filters = [column.like("%{}%".format(search)) for column in _columns]
+         query = query.filter(or_(*_filters))
 
-   def resolve_fields_list(self, info, only_available=True):
+      return query.order_by(*sort)
+
+   def resolve_fields_list(self, info, only_available=True, sort=list(),
+      search=None, **args):
       """ Returns available field list (default behavior)
       
       Arguments:
@@ -204,7 +234,8 @@ class Query(ObjectType):
       
       Keyword Arguments:
          only_available {bool} -- if False returns all entries regardless 
-         of status. (default: {True})
+            of status. (default: {True})
+         sort {list} -- columns list to sorting. e.g.: ["field_name_asc"]
       """
 
       query = Fields.get_query(info)
@@ -212,7 +243,20 @@ class Query(ObjectType):
       if only_available:
          query = query.filter_by(status=True)
 
-      return query
+      query = query.join(models.ReleaseTag)
+
+      if search:
+         _columns = [
+            models.Fields.display_name,
+            models.Fields.field_name,
+            models.ReleaseTag.release_display_name,
+            models.ReleaseTag.name
+         ]
+
+         _filters = [column.like("%{}%".format(search)) for column in _columns]
+         query = query.filter(or_(*_filters))
+
+      return query.order_by(*sort)
 
    def resolve_processes_list(self, info, all_instances=None, running=None,
       published=None, saved=None, sort=list(), search=None, **args):
