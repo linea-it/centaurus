@@ -2,6 +2,7 @@ from graphene import Int, String, Boolean, DateTime, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
 from models import ReleaseTag as ReleaseTagModel
+from utils import Connection
 
 
 class ReleaseTagAttribute():
@@ -21,3 +22,4 @@ class ReleaseTag(SQLAlchemyObjectType, ReleaseTagAttribute):
     class Meta:
         model = ReleaseTagModel
         interfaces = (relay.Node,)
+        connection_class = Connection
