@@ -1,9 +1,10 @@
-from graphene import Int, Float, String, Boolean, DateTime, relay
+from graphene import Int, Float, String, Boolean, DateTime, relay, Field
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import Modules as ModulesModel
-# from schemas.tg_user import TgUser
-# from schemas.pipelines_modules import PipelinesModules
+import models
+from schemas.tg_user import TgUser
+
+import utils
 
 
 class ModulesAttribute():
@@ -20,7 +21,11 @@ class ModulesAttribute():
 
 class Modules(SQLAlchemyObjectType, ModulesAttribute):
     """Modules node"""
+    data_loader = utils.DataLoaderOneToOne(models.Modules, models.TgUser)
+
+    def resolve_user(self, info):
+        return Modules.data_loader.load(self.module_id)
 
     class Meta:
-        model = ModulesModel
+        model = models.Modules
         interfaces = (relay.Node,)

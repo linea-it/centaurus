@@ -1,7 +1,10 @@
 from graphene import Int, String, Boolean, DateTime, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import Map as MapModel
+import models
+import schemas
+
+import utils
 
 
 class MapAttribute():
@@ -23,7 +26,15 @@ class MapAttribute():
 
 class Map(SQLAlchemyObjectType, MapAttribute):
     """Map node"""
+    data_loader_table = utils.DataLoaderOneToOne(models.Map, models.Tables)
+    data_loader_tag = utils.DataLoaderOneToOne(models.Map, models.ReleaseTag)
+
+    def resolve_table(self, info):
+        return Map.data_loader_table.load(self.map_id)
+
+    def resolve_tag(self, info):
+        return Map.data_loader_tag.load(self.map_id)
 
     class Meta:
-        model = MapModel
+        model = models.Map
         interfaces = (relay.Node,)

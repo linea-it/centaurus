@@ -1,7 +1,7 @@
 from graphene import Int, String, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import ProductType as ProductTypeModel
+import models
 
 
 class ProductTypeAttribute():
@@ -15,5 +15,5 @@ class ProductType(SQLAlchemyObjectType, ProductTypeAttribute):
     """Product Type node"""
 
     class Meta:
-        model = ProductTypeModel
+        model = models.ProductType
         interfaces = (relay.Node,)

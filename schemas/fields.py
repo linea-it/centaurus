@@ -1,7 +1,10 @@
 from graphene import Int, String, Boolean, DateTime, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import Fields as FieldsModel
+import models
+from schemas.release_tag import ReleaseTag
+
+import utils
 
 
 class FieldsAttribute():
@@ -18,8 +21,14 @@ class FieldsAttribute():
 
 
 class Fields(SQLAlchemyObjectType, FieldsAttribute):
-    """Fields node"""
+    """Fields Tag node"""
+    
+    data_loader_release_tag = utils.DataLoaderOneToOne(
+        models.Fields, models.ReleaseTag)
+
+    def resolve_release_tag(self, info):
+        return Fields.data_loader_release_tag.load(self.field_id)
 
     class Meta:
-        model = FieldsModel
+        model = models.Fields
         interfaces = (relay.Node,)

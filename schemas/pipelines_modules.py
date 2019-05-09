@@ -1,7 +1,11 @@
-from graphene import Int, String, relay
+from graphene import Int, String, relay, Field
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import PipelinesModules as PipelinesModulesModel
+import models
+from schemas.modules import Modules
+from schemas.pipelines import Pipelines
+
+import utils
 
 
 class PipelinesModulesAttribute():
@@ -9,9 +13,24 @@ class PipelinesModulesAttribute():
     module_id = Int(description="Module unique ID number")
     xml_config = String()
 
+
 class PipelinesModules(SQLAlchemyObjectType, PipelinesModulesAttribute):
     """Pipelines modules node"""
+    data_loader_module = utils.DataLoaderOneToOne(
+        models.PipelinesModules,
+        models.Modules,
+        pk_inner_model=models.PipelinesModules.module_id)
+    data_loader_pipeline = utils.DataLoaderOneToOne(
+        models.PipelinesModules,
+        models.Pipelines,
+        pk_inner_model=models.PipelinesModules.pipeline_id)
+
+    def resolve_module(self, info):
+        return PipelinesModules.data_loader_module.load(self.module_id)
+
+    def resolve_pipeline(self, info):
+        return PipelinesModules.data_loader_pipeline.load(self.pipeline_id)
 
     class Meta:
-        model = PipelinesModulesModel
+        model = models.PipelinesModules
         interfaces = (relay.Node,)

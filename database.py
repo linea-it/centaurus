@@ -17,6 +17,7 @@ def before_cursor_execute(conn, cursor, statement,
     conn.info.setdefault('query_start_time', []).append(time.time())
     logger.debug("-" * 40)
     logger.debug("START query: %s", statement)
+    logger.debug("parameters: %s", parameters)
 
 @event.listens_for(Engine, "after_cursor_execute")
 def after_cursor_execute(conn, cursor, statement,

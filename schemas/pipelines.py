@@ -1,7 +1,9 @@
-from graphene import Int, String, Boolean, DateTime, List, Field, ObjectType, relay
+from graphene import Int, String, Boolean, DateTime, List, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
-from models import Pipelines as PipelinesModel
 from schemas.processes import Processes
+import models
+
+import utils
 
 
 class PipelinesAttribute():
@@ -20,13 +22,16 @@ class PipelinesAttribute():
     multidataset = Boolean(description="Allows multiple datasets to be used if true")
     readme = String(description="Document describing how the pipeline works.")
     any_output_class = Boolean()
-    processes = List(lambda: Processes) 
+    processes = List(lambda: Processes)
 
 
 class Pipelines(SQLAlchemyObjectType, PipelinesAttribute):
     """Pipelines node"""
+    process_loader = utils.DataLoaderOneToMany(models.Pipelines, models.ProcessPipeline, models.Processes)
 
+    def resolve_processes(self, info):
+        return Pipelines.process_loader.load(self.pipeline_id)
     
     class Meta:
-        model = PipelinesModel
+        model = models.Pipelines
         interfaces = (relay.Node,)

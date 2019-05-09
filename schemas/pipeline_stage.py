@@ -1,7 +1,7 @@
 from graphene import Int, String, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import PipelineStage as PipelineStageModel
+import models
 
 
 class PipelineStageAttribute():
@@ -15,5 +15,5 @@ class PipelineStage(SQLAlchemyObjectType, PipelineStageAttribute):
     """PipelineStage node"""
 
     class Meta:
-        model = PipelineStageModel
+        model = models.PipelineStage
         interfaces = (relay.Node,)

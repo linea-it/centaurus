@@ -1,7 +1,9 @@
-from graphene import Int, String, Boolean, relay
+from graphene import Int, String, Boolean, Field, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
+from schemas.product_type import ProductType
+import models
 
-from models import ProductClass as ProductClassModel
+import utils
 
 
 class ProductClassAttribute():
@@ -14,7 +16,11 @@ class ProductClassAttribute():
 
 class ProductClass(SQLAlchemyObjectType, ProductClassAttribute):
     """Product Class node"""
+    data_loader_product_type = utils.DataLoaderOneToOne(models.ProductClass, models.ProductType)
+
+    def resolve_product_type(self, info):
+        return ProductClass.data_loader_product_type.load(self.class_id)
 
     class Meta:
-        model = ProductClassModel
+        model = models.ProductClass
         interfaces = (relay.Node,)

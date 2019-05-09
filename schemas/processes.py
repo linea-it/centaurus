@@ -1,8 +1,10 @@
 from graphene import Int, String, Boolean, DateTime, List, Field, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
-from models import Processes as ProcessesModel
-from utils import Connection
+import models
+import schemas
+
+import utils
 import os
 
 SCIENCE_URL = os.getenv('SCIENCE_URL')
@@ -37,13 +39,25 @@ class ProcessesAttribute():
 
 class Processes(SQLAlchemyObjectType, ProcessesAttribute):
     """Processes node"""
+    session_loader = utils.DataLoaderOneToOne(models.Processes, models.Session)
+    fields_loader = utils.DataLoaderOneToMany(
+        models.Processes, models.ProcessFields, models.Fields)
+    inputs_loader = utils.DataLoaderOneToMany(
+        models.Processes, models.ProcessInputs, models.Products)
 
+    def resolve_session(self, info):
+        return Processes.session_loader.load(self.process_id)
+
+    def resolve_fields(self, info):
+        return Processes.fields_loader.load(self.process_id)
+
+    def resolve_inputs(self, info):
+        return Processes.inputs_loader.load(self.process_id)
 
     class Meta:
-        model = ProcessesModel
+        model = models.Processes
         interfaces = (relay.Node,)
-        connection_class = Connection
-
+        connection_class = utils.Connection
 
     def resolve_product_log(self, info):
         """ Mount the product_log link """
