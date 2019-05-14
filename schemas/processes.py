@@ -1,8 +1,7 @@
-from graphene import Int, String, Boolean, DateTime, List, Field, relay
+from graphene import Int, String, Boolean, DateTime, relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 
 import models
-import schemas
 
 import utils
 import os
