@@ -163,6 +163,7 @@ class Modules(Base):
     user_id = Column(ForeignKey('tg_user.user_id'))
 
     user = relationship('TgUser')
+    pipelines_modules = relationship('PipelinesModules')
 
 
 class Session(Base):

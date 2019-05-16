@@ -1,5 +1,8 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
-from graphene import Schema, ObjectType, Field, List, String, Int, Boolean, Argument, InputObjectType
+from graphene import (
+    Schema, ObjectType, Field, List, String, Int, Boolean,
+    Argument, InputObjectType
+)
 from sqlalchemy import or_
 
 from schemas.product_class import ProductClass
@@ -21,7 +24,8 @@ from schemas.map import Map
 from schemas.catalog import Catalog
 from schemas.filters import Filters
 
-# Unused imports but necessary to show their objects from other objects.
+# Unused imports but necessary to show their objects from 
+# other objects.
 from schemas.tg_user import TgUser
 from schemas.pipeline_status import PipelineStatus
 from schemas.file_locator import FileLocator
@@ -68,7 +72,9 @@ class Query(ObjectType):
     # gets all entries
     product_class_list = SQLAlchemyConnectionField(
         ProductClass,
-        sort=Argument(utils.sort_enum_for([models.ProductClass, models.ProductType])),
+        sort=Argument(utils.sort_enum_for([
+            models.ProductClass, models.ProductType
+        ])),
         search=SearchProductClass(),
         before=String(),
         after=String(),
@@ -77,16 +83,20 @@ class Query(ObjectType):
     )
     pipelines_list = SQLAlchemyConnectionField(
         Pipelines,
-        sort=Argument(utils.sort_enum_for([models.Pipelines, models.Processes])),
+        sort=Argument(utils.sort_enum_for([
+            models.Pipelines, models.PipelineStage,
+            models.GroupPypelines, models.TgUser
+        ])),
         search=SearchPipelinesList(),
         before=String(),
         after=String(),
         first=Int(),
-        last=Int()
-    )
+        last=Int())
     modules_list = SQLAlchemyConnectionField(
         Modules,
-        sort=Argument(utils.sort_enum_for([models.Modules, models.TgUser])),
+        sort=Argument(utils.sort_enum_for([
+            models.Modules, models.TgUser, models.Pipelines
+        ])),
         search=SearchModulesList(),
         before=String(),
         after=String(),
@@ -114,7 +124,7 @@ class Query(ObjectType):
     release_tag_list = SQLAlchemyConnectionField(
         ReleaseTag,
         only_available=Boolean(),
-        sort=Argument(List(utils.sort_enum_for(models.ReleaseTag))),
+        sort=Argument(utils.sort_enum_for(models.ReleaseTag)),
         search=String(),
         before=String(),
         after=String(),
@@ -124,7 +134,9 @@ class Query(ObjectType):
 
     fields_list = SQLAlchemyConnectionField(
         Fields, only_available=Boolean(),
-        sort=Argument(List(utils.sort_enum_for(models.Fields))),
+        sort=Argument(utils.sort_enum_for([
+            models.Fields, models.ReleaseTag
+        ])),
         search=String(),
         before=String(),
         after=String(),
@@ -138,7 +150,10 @@ class Query(ObjectType):
         running=Boolean(),
         published=Boolean(),
         saved=Boolean(),
-        sort=Argument(List(utils.sort_enum_for(models.Processes))),
+        sort=Argument(utils.sort_enum_for([
+            models.Processes, models.TgUser, models.Fields,
+            models.ReleaseTag, models.ProcessStatus
+        ])),
         search=String(),
         before=String(),
         after=String(),
@@ -153,7 +168,13 @@ class Query(ObjectType):
         type_id=Int(),
         class_id=Int(),
         band=String(),
-        sort=Argument(List(utils.sort_enum_for(models.Products))),
+        sort=Argument(utils.sort_enum_for([
+            models.Products,
+            models.ReleaseTag,
+            models.Fields,
+            models.ProductClass,
+            models.ProductType
+        ])),
         filter=String(),
         before=String(),
         after=String(),
@@ -171,30 +192,31 @@ class Query(ObjectType):
     fields_by_tag_id = List(
         lambda: Fields,
         tag_id=Int(),
-        only_available=Boolean())
+        only_available=Boolean()
+    )
     pipelines_by_field_id_and_stage_id = List(
-        lambda: PipelinesExecution, stage_id=Int(), field_id=Int())
+        lambda: PipelinesExecution, stage_id=Int(), field_id=Int()
+    )
     processes_by_field_id_and_pipeline_id = List(
-        lambda: Processes, field_id=Int(), pipeline_id=Int())
+        lambda: Processes, field_id=Int(), pipeline_id=Int()
+    )
     products_by_process_id = List(lambda: Products, process_id=Int())
     process_components_by_process_id = List(
-        lambda: ProcessComponent, process_id=Int())
+        lambda: ProcessComponent, process_id=Int()
+    )
     comments_by_process_id = List(lambda: Comments, process_id=Int())
     fields_by_tagname = List(lambda: Fields, tagname=String())
     product_class_by_type_id = List(lambda: ProductClass, type_id=Int())
 
-    def resolve_product_class_list(
-            self,
-            info,
-            sort=list(),
-            search=None,
-            **args):
+    def resolve_product_class_list(self, info, sort=list(),
+        search=None, **args):
         query = ProductClass.get_query(info)
         tables = utils.selected_tables_from_arguments(sort)
+
         if utils.is_valid_search(search):
-            tables = tables.union(
-                utils.selected_tables_from_arguments(
-                    search['columns']))
+            tables = tables.union(utils.selected_tables_from_arguments(
+                search['columns']
+            ))
 
         if 'product_type' in tables:
             query = query.join(models.ProductType)
@@ -206,17 +228,23 @@ class Query(ObjectType):
 
         return query.order_by(*sort)
 
-    def resolve_pipelines_list(self, info, sort=list(), search=None, **args):
+    def resolve_pipelines_list(self, info, sort=list(), search=None,
+        **args):
         query = Pipelines.get_query(info)
         tables = utils.selected_tables_from_arguments(sort)
         if utils.is_valid_search(search):
             tables = tables.union(
                 utils.selected_tables_from_arguments(
-                    search['columns']))
+                    search['columns']
+                )
+            )
 
-        if 'processes' in tables:
-            query = query.join(models.ProcessPipeline)
-            query = query.join(models.Processes)
+        if 'tg_user' in tables:
+            query = query.join(models.TgUser)
+        if 'group_pypelines' in tables:
+            query = query.join(models.GroupPypelines)
+        if 'pipeline_stage' in tables:
+            query = query.join(models.PipelineStage)
 
         _filters = utils.prepare_sqlalchemy_filters_casting_columns_to_str(
             search)
@@ -235,6 +263,9 @@ class Query(ObjectType):
 
         if 'tg_user' in tables:
             query = query.join(models.TgUser)
+        if 'pipelines' in tables:
+            query = query.join(models.PipelinesModules)
+            query = query.join(models.Pipelines)
 
         _filters = utils.prepare_sqlalchemy_filters_casting_columns_to_str(
             search)
@@ -338,7 +369,6 @@ class Query(ObjectType):
            only_available {bool} -- if False returns all entries regardless
               of status. (default: {True})
            sort {list} -- columns list to sorting. e.g.: ["name_asc"]
-
         """
 
         query = ReleaseTag.get_query(info)
@@ -386,16 +416,8 @@ class Query(ObjectType):
             query = query.filter(or_(*_filters))
         return query.order_by(*sort)
 
-    def resolve_processes_list(
-            self,
-            info,
-            all_instances=None,
-            running=None,
-            published=None,
-            saved=None,
-            sort=list(),
-            search=None,
-            **args):
+    def resolve_processes_list(self, info, all_instances=None, running=None,
+        published=None, saved=None, sort=list(), search=None, **args):
 
         query = Processes.get_query(info).filter_by(flag_removed=False)
 
@@ -439,17 +461,9 @@ class Query(ObjectType):
 
         return query.order_by(*sort)
 
-    def resolve_products_list(
-            self,
-            info,
-            tag_id=None,
-            field_id=None,
-            type_id=None,
-            class_id=None,
-            band=None,
-            filter=None,
-            sort=list(),
-            **args):
+    def resolve_products_list(self, info, tag_id=None, field_id=None,
+        type_id=None, class_id=None, band=None, filter=None, sort=list(),
+        **args):
         query = Products.get_query(info)
         query = query.join(models.ProductField)
         query = query.outerjoin(models.Tables)
