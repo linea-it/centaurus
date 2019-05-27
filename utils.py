@@ -93,6 +93,7 @@ class DataLoaderOneToOne(DataLoader):
 
     def batch_load_fn(self, keys):
         pk_model = db_session.query(self._pk_inner_model, self._outer_model).\
+            select_from(self._inner_model).\
             join(self._outer_model).\
             filter(self._pk_inner_model.in_(keys)).all()
 
@@ -123,6 +124,7 @@ class DataLoaderOneToMany(DataLoader):
 
     def batch_load_fn(self, keys):
         pk_model = db_session.query(self._pk_inner_model, self._outer_model).\
+            select_from(self._inner_model).\
             join(self._secondary_model).\
             join(self._outer_model).\
             filter(self._pk_inner_model.in_(keys)).all()
