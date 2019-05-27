@@ -187,6 +187,7 @@ class ReleaseTag(SQLAlchemyObjectType, ReleaseTagAttribute):
     class Meta:
         model = models.ReleaseTag
         interfaces = (relay.Node,)
+        connection_class = utils.Connection
 
 
 class FiltersAttribute():
