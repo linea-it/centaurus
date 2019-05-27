@@ -1,12 +1,11 @@
 # coding: utf-8
 
-from database import Base, engine
+from database import Base
 from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, Column, DateTime, Date, 
     SmallInteger, Integer, String, Text, text, Sequence, Float,
-    Table, ForeignKey, UniqueConstraint
+    ForeignKey, UniqueConstraint
 )
-from sqlalchemy import PrimaryKeyConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, backref, deferred
 
 
@@ -164,6 +163,7 @@ class Modules(Base):
     user_id = Column(ForeignKey('tg_user.user_id'))
 
     user = relationship('TgUser')
+    pipelines_modules = relationship('PipelinesModules')
 
 
 class Session(Base):
