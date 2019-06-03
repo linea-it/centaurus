@@ -543,9 +543,6 @@ class TablesAttribute():
     schema_name = String()
     table_name = String()
     dachs_url = String()
-    catalog = Field(lambda: Catalog)
-    mask = Field(lambda: Mask)
-    map = Field(lambda: Map)
 
 
 class Tables(SQLAlchemyObjectType, TablesAttribute):

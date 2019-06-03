@@ -24,18 +24,58 @@ class SearchProductClass(InputObjectType):
 class SearchPipelinesList(InputObjectType):
     text = String()
     columns = utils.column_from_classes(
-        [models.Pipelines, models.Processes])
+        [
+            models.Pipelines,
+            models.Processes,
+            models.PipelineStage,
+            models.GroupPypelines,
+            models.TgUser])
 
 
 class SearchModulesList(InputObjectType):
     text = String()
     columns = utils.column_from_classes(
-        [models.Modules, models.TgUser])
+        [models.Modules, models.TgUser, models.Pipelines])
 
 
 class SearchProductType(InputObjectType):
     text = String()
     columns = utils.column_from_classes(models.ProductType)
+
+
+class SearchFieldList(InputObjectType):
+    text = String()
+    columns = utils.column_from_classes(
+        [models.Fields, models.ReleaseTag])
+
+
+class SearchProcessList(InputObjectType):
+    text = String()
+    columns = utils.column_from_classes(
+        [models.Processes, models.ProcessStatus, models.Fields, models.ReleaseTag, models.TgUser])
+
+
+class SearchProductsList(InputObjectType):
+    text = String()
+    columns = utils.column_from_classes(
+        [
+            models.Products,
+            models.ReleaseTag,
+            models.Fields,
+            models.ProductClass,
+            models.ProductType,
+            models.Mask,
+            models.Map])
+
+
+class SearchReleaseTag(InputObjectType):
+    text = String()
+    columns = utils.column_from_classes([models.ReleaseTag, models.Fields])
+
+
+class SearchPipelinesModulesList(InputObjectType):
+    text = String()
+    columns = utils.column_from_classes([models.ReleaseTag, models.Fields])
 
 
 class Query(ObjectType):
@@ -92,13 +132,14 @@ class Query(ObjectType):
     map_list = SQLAlchemyConnectionField(schemas.Map)
     catalog_list = SQLAlchemyConnectionField(schemas.Catalog)
     filters_list = SQLAlchemyConnectionField(schemas.Filters)
+    session_list = SQLAlchemyConnectionField(schemas.Session)
 
     # gets list by filters
     release_tag_list = SQLAlchemyConnectionField(
         schemas.ReleaseTag,
         only_available=Boolean(),
-        sort=Argument(utils.sort_enum_for(models.ReleaseTag)),
-        search=String(),
+        sort=Argument(utils.sort_enum_for([models.ReleaseTag, models.Fields])),
+        search=SearchReleaseTag(),
         before=String(),
         after=String(),
         first=Int(),
@@ -110,7 +151,7 @@ class Query(ObjectType):
         sort=Argument(utils.sort_enum_for([
             models.Fields, models.ReleaseTag
         ])),
-        search=String(),
+        search=SearchFieldList(),
         before=String(),
         after=String(),
         first=Int(),
@@ -127,7 +168,7 @@ class Query(ObjectType):
             models.Processes, models.TgUser, models.Fields,
             models.ReleaseTag, models.ProcessStatus
         ])),
-        search=String(),
+        search=SearchProcessList(),
         before=String(),
         after=String(),
         first=Int(),
@@ -148,7 +189,7 @@ class Query(ObjectType):
             models.ProductClass,
             models.ProductType
         ])),
-        filter=String(),
+        search=SearchProductsList(),
         before=String(),
         after=String(),
         first=Int(),
@@ -347,20 +388,15 @@ class Query(ObjectType):
         """
 
         query = schemas.ReleaseTag.get_query(info)
-        _columns = [
-            models.ReleaseTag.release_display_name,
-            models.ReleaseTag.name
-        ]
-        if only_available:
-            query = query.join(models.Fields).filter_by(status=True)
-            _columns += [
-                models.Fields.display_name,
-                models.Fields.field_name
-            ]
-        if search:
-            _filters = [column.like("%{}%".format(search))
-                        for column in _columns]
+        query = query.join(models.Fields)
+
+        _filters = utils.prepare_sqlalchemy_filters_casting_columns_to_str(
+            search)
+        if _filters:
             query = query.filter(or_(*_filters))
+
+        if only_available:
+            query = query.filter_by(status=True)
 
         return query.order_by(*sort)
 
@@ -374,21 +410,24 @@ class Query(ObjectType):
               of status. (default: {True})
            sort {list} -- columns list to sorting. e.g.: ["field_name_asc"]
         """
-
         query = schemas.Fields.get_query(info)
         if only_available:
             query = query.filter_by(status=True)
-        query = query.join(models.ReleaseTag)
-        if search:
-            _columns = [
-                models.Fields.display_name,
-                models.Fields.field_name,
-                models.ReleaseTag.release_display_name,
-                models.ReleaseTag.name
-            ]
-            _filters = [column.like("%{}%".format(search))
-                        for column in _columns]
+
+        tables = utils.selected_tables_from_arguments(sort)
+        if utils.is_valid_search(search):
+            tables = tables.union(utils.selected_tables_from_arguments(
+                search['columns']
+            ))
+
+        if 'release_tag' in tables:
+            query = query.join(models.ReleaseTag)
+
+        _filters = utils.prepare_sqlalchemy_filters_casting_columns_to_str(
+            search)
+        if _filters:
             query = query.filter(or_(*_filters))
+
         return query.order_by(*sort)
 
     def resolve_processes_list(
@@ -429,17 +468,9 @@ class Query(ObjectType):
         query = query.outerjoin(models.ReleaseTag)
         query = query.join(models.Session).join(models.TgUser)
 
-        if search:
-            _columns = [
-                models.Processes.name,
-                models.ProcessStatus.display_name,
-                models.Fields.display_name,
-                models.ReleaseTag.release_display_name,
-                models.TgUser.display_name
-            ]
-
-            _filters = [column.like("%{}%".format(search))
-                        for column in _columns]
+        _filters = utils.prepare_sqlalchemy_filters_casting_columns_to_str(
+            search)
+        if _filters:
             query = query.filter(or_(*_filters))
 
         return query.order_by(*sort)
@@ -452,7 +483,7 @@ class Query(ObjectType):
             type_id=None,
             class_id=None,
             band=None,
-            filter=None,
+            search=None,
             sort=list(),
             **args):
         query = schemas.Products.get_query(info)
@@ -485,16 +516,9 @@ class Query(ObjectType):
         if type_id:
             query = query.filter(models.ProductType.type_id == type_id)
 
-        if filter:
-            _columns = [
-                models.ReleaseTag.name, models.Fields.field_name,
-                models.Products.display_name,
-                models.ProductClass.class_name, models.ProductType.type_name,
-                models.Map.filter, models.Mask.filter
-            ]
-
-            _filters = [column.like("%{0}%".format(filter))
-                        for column in _columns]
+        _filters = utils.prepare_sqlalchemy_filters_casting_columns_to_str(
+            search)
+        if _filters:
             query = query.filter(or_(*_filters))
 
         return query.order_by(*sort)
