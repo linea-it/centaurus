@@ -37,6 +37,7 @@ class ProductClass(SQLAlchemyObjectType, ProductClassAttribute):
     class Meta:
         model = models.ProductClass
         interfaces = (relay.Node,)
+        connection_class = utils.Connection
 
 
 class ProductTypeAttribute():
@@ -85,6 +86,7 @@ class Pipelines(SQLAlchemyObjectType, PipelinesAttribute):
     class Meta:
         model = models.Pipelines
         interfaces = (relay.Node,)
+        connection_class = utils.Connection
 
 
 class ModulesAttribute():
@@ -109,6 +111,7 @@ class Modules(SQLAlchemyObjectType, ModulesAttribute):
     class Meta:
         model = models.Modules
         interfaces = (relay.Node,)
+        connection_class = utils.Connection
 
 
 class PipelinesModulesAttribute():
@@ -658,6 +661,7 @@ class Fields(SQLAlchemyObjectType, FieldsAttribute):
     class Meta:
         model = models.Fields
         interfaces = (relay.Node,)
+        connection_class = utils.Connection
 
 
 class ProcessInputsAttribute():
