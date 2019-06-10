@@ -1,16 +1,16 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
 from graphene import (
     Schema, ObjectType, Field, List, String, Int, Boolean,
-    Argument, InputObjectType
+    Argument, InputObjectType, relay
 )
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, func
 
 import models
-import views
 import schemas
 import utils
 import os
 
+from database import db_session
 
 INSTANCE = os.getenv('API_INSTANCE')
 
@@ -80,6 +80,7 @@ class SearchPipelinesModulesList(InputObjectType):
 
 class Query(ObjectType):
     """Query objects for GraphQL API"""
+    node = relay.Node.Field()
 
     # gets all entries
     product_class_list = SQLAlchemyConnectionField(
@@ -209,9 +210,15 @@ class Query(ObjectType):
         tag_id=Int(),
         only_available=Boolean()
     )
-    pipelines_by_field_id_and_stage_id = List(
-        lambda: schemas.PipelinesExecution, stage_id=Int(), field_id=Int()
-    )
+    pipelines_by_stage_id_and_tag_id_and_field_id = relay.ConnectionField(
+        schemas.PipelinesExecutionConnection,
+        stage_id=Int(),
+        tag_id=Int(),
+        field_id=Int(),
+        before=String(),
+        after=String(),
+        first=Int(),
+        last=Int())
     processes_by_field_id_and_pipeline_id = List(
         lambda: schemas.Processes, field_id=Int(), pipeline_id=Int()
     )
@@ -305,27 +312,66 @@ class Query(ObjectType):
 
         return query.order_by(*sort)
 
-    def resolve_pipelines_by_field_id_and_stage_id(
-            self, info, stage_id, field_id=None):
-        query = schemas.PipelinesExecution.get_query(info)
+    def resolve_pipelines_by_stage_id_and_tag_id_and_field_id(
+            self, info, stage_id=None, tag_id=None, field_id=None, **args):
 
-        return query.filter_by(
-            pipeline_stage_id=stage_id, instance=INSTANCE
-        ).filter_by(
-            field_id=field_id
-        ).join(
+        sub_query = db_session.query(
+            func.distinct(models.Pipelines.pipeline_id).label('pipeline_id'),
+            models.Pipelines.name.label('pipeline_name'),
+            models.Pipelines.display_name.label('pipeline_display_name'),
+            models.PipelineStage.display_name.label('stage_display_name'),
+            func.count(func.distinct(models.Processes.process_id)).label('process_count'),
+            func.max(models.Processes.process_id).label('last_process_id')
+        ).select_from(
             models.Pipelines
         ).join(
-            models.PipelineStatus
-        ).filter_by(
-            name='enabled'
-        ).join(
             models.Pipelines.processes
-        ).filter_by(
-            flag_removed=False
+        ).join(
+            models.PipelineStage
+        ).join(
+            models.ProcessStatus
+        ).group_by(
+            models.Pipelines.pipeline_id,
+            models.PipelineStage.pipeline_stage_id
         ).order_by(
-            views.PipelinesExecution.name
+            models.PipelineStage.display_name, models.Pipelines.display_name
         )
+
+        _filters = list()
+        _filters.append(models.Processes.flag_removed == False)
+        _filters.append(models.Processes.instance == INSTANCE)
+        _filters.append(models.ProcessStatus.name == 'success')
+
+        # The link between the table processes and release_tag table depends on
+        # the table fields
+        if field_id or tag_id:
+            sub_query = sub_query.join(
+                models.ProcessFields).join(
+                models.Fields)
+        if field_id:
+            _filters.append(models.ProcessFields.field_id == field_id)
+        if tag_id:
+            sub_query = sub_query.join(models.ReleaseTag)
+            _filters.append(models.ReleaseTag.tag_id == tag_id)
+        if stage_id:
+            _filters.append(models.Pipelines.pipeline_stage_id == stage_id)
+        sub_query = sub_query.filter(and_(*_filters)).subquery()
+
+        query = db_session.query(
+            sub_query,
+            models.Processes.start_time.label('last_process_start_time'),
+            models.Processes.end_time.label('last_process_end_time'),
+            models.ProcessStatus.name.label('last_process_status'),
+        ).join(
+            sub_query,
+            models.Processes.process_id == sub_query.c.last_process_id).join(
+            models.ProcessStatus).all()
+
+        result = list()
+        for row in query:
+            result.append(schemas.PipelinesExecution(**row._asdict()))
+
+        return result
 
     def resolve_processes_by_field_id_and_pipeline_id(
             self, info, pipeline_id, field_id=None):

@@ -754,3 +754,45 @@ edges {
         }}
         """
         self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_pipelines_no_args(self):
+        query = """
+{pipelinesByStageIdAndTagIdAndFieldId (first: 3){
+  edges {
+    node {
+      pipelineId
+      pipelineName
+      pipelineDisplayName
+      stageDisplayName
+      processCount
+      lastProcessId
+      lastProcessStartTime
+      lastProcessEndTime
+      lastProcessStatus
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_pipelines_by_stage_id_and_tag_id_and_field_id(self):
+        query = """
+{pipelinesByStageIdAndTagIdAndFieldId (first: 3, stageId: 9, fieldId: 40, tagId: 24){
+  edges {
+    node {
+      pipelineId
+      pipelineName
+      pipelineDisplayName
+      stageDisplayName
+      processCount
+      lastProcessId
+      lastProcessStartTime
+      lastProcessEndTime
+      lastProcessStatus
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
