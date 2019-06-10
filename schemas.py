@@ -646,3 +646,19 @@ class ProcessPipeline(SQLAlchemyObjectType, ProcessPipelineAttribute):
     class Meta:
         model = models.ProcessPipeline
         interfaces = (relay.Node,)
+
+
+class GitInfo(ObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+
+    current_branch = String()
+    last_commit = String()
+    last_commit_date = String()
+    last_commit_author = String()
+    last_tag = String()
+
+
+class GitInfoConnection(relay.Connection):
+    class Meta:
+        node = GitInfo

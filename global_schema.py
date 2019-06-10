@@ -4,6 +4,7 @@ from graphene import (
     Argument, InputObjectType, relay
 )
 from sqlalchemy import or_, and_, func
+import subprocess
 
 import models
 import schemas
@@ -230,6 +231,7 @@ class Query(ObjectType):
     fields_by_tagname = List(lambda: schemas.Fields, tagname=String())
     product_class_by_type_id = List(
         lambda: schemas.ProductClass, type_id=Int())
+    git_info = relay.ConnectionField(schemas.GitInfoConnection)
 
     def resolve_product_class_list(self, info, sort=list(),
                                    search=None, **args):
@@ -599,6 +601,26 @@ class Query(ObjectType):
     def resolve_modules_by_name(self, info, name):
         query = schemas.Modules.get_query(info)
         return query.filter(models.Modules.name == name).one_or_none()
+
+    def resolve_git_info(self, info, **args):
+        current_branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip()
+        last_commit = subprocess.check_output(
+            ["git", "log", "-1", "--format=%H"]).strip()
+        last_commit_date = subprocess.check_output(
+            ["git", "log", "-1", "--format=%cd"]).strip()
+        last_commit_author = subprocess.check_output(
+            ["git", "log", "-1", "--pretty=format:%an"]).strip()
+        last_tag = subprocess.check_output(
+            ["git", "describe", "--tags"]).strip()
+
+        return [schemas.GitInfo(
+            current_branch=current_branch.decode("utf-8"),
+            last_commit=last_commit.decode("utf-8"),
+            last_commit_date=last_commit_date.decode("utf-8"),
+            last_commit_author=last_commit_author.decode("utf-8"),
+            last_tag=last_tag.decode("utf-8")
+        )]
 
 
 schema = Schema(query=Query)
