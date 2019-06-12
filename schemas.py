@@ -662,3 +662,17 @@ class GitInfo(ObjectType):
 class GitInfoConnection(relay.Connection):
     class Meta:
         node = GitInfo
+
+
+class TimeProfile(ObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+
+    display_name = String()
+    module_name = String()
+    jobs = List(JobRuns)
+
+
+class TimeProfileConnection(relay.Connection):
+    class Meta:
+        node = TimeProfile

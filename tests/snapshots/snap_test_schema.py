@@ -3156,3 +3156,36 @@ snapshots['APITestCase::test_pipelines_no_args 1'] = {
         ]
     }
 }
+
+snapshots['APITestCase::test_time_profile 1'] = {
+    'timeProfile': {
+        'edges': [
+            {
+                'node': {
+                    'displayName': 'Slicing',
+                    'jobs': [
+                        {
+                            'endTime': '2018-06-05T20:21:19',
+                            'hid': '1',
+                            'startTime': '2018-06-05T20:20:56'
+                        }
+                    ],
+                    'moduleName': 'wazp_slice_zmag'
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'Split Area',
+                    'jobs': [
+                        {
+                            'endTime': '2018-06-05T20:21:34',
+                            'hid': '1',
+                            'startTime': '2018-06-05T20:21:19'
+                        }
+                    ],
+                    'moduleName': 'wazp_split_area'
+                }
+            }
+        ]
+    }
+}

@@ -796,3 +796,22 @@ edges {
 }
         """
         self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_time_profile(self):
+        query = """
+{timeProfile(processId: 10031073, first: 2){
+  edges{
+    node{
+      displayName
+      moduleName
+			jobs {
+        hid
+        startTime
+        endTime
+      }
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)

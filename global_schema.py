@@ -232,6 +232,9 @@ class Query(ObjectType):
     product_class_by_type_id = List(
         lambda: schemas.ProductClass, type_id=Int())
     git_info = relay.ConnectionField(schemas.GitInfoConnection)
+    time_profile = relay.ConnectionField(
+        schemas.TimeProfileConnection,
+        process_id=Int())
 
     def resolve_product_class_list(self, info, sort=list(),
                                    search=None, **args):
@@ -621,6 +624,47 @@ class Query(ObjectType):
             last_commit_author=last_commit_author.decode("utf-8"),
             last_tag=last_tag.decode("utf-8")
         )]
+
+    def resolve_time_profile(self, info, process_id, **args):
+        l_modules = list()
+
+        modules = db_session.query(
+            func.distinct(models.Modules.module_id).label('module_id'),
+            models.Modules.name.label('name'),
+            models.Modules.display_name.label('display_name')
+        ).select_from(
+            models.JobRuns
+        ).join(
+            models.Modules
+        ).filter(
+            models.JobRuns.process_id == process_id
+        ).all()
+
+        for module in modules:
+            query = db_session.query(
+                models.JobRuns.hid.label('hid'),
+                models.JobRuns.start_time.label('start_time'),
+                models.JobRuns.end_time.label('end_time')
+            ).select_from(
+                models.JobRuns
+            ).join(
+                models.Modules
+            ).filter(
+                models.JobRuns.process_id == process_id,
+                models.Modules.module_id == module.module_id
+            ).all()
+
+            jobs = list()
+            for row in query:
+                jobs.append(schemas.JobRuns(**row._asdict()))
+
+            l_modules.append(schemas.TimeProfile(
+                display_name=module.display_name,
+                module_name=module.name,
+                jobs=jobs
+            ))
+
+        return l_modules
 
 
 schema = Schema(query=Query)
