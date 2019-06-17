@@ -9,3 +9,5 @@ cp docker-compose.yml.template docker-compose.yml
 cp global-env.template global-env
 docker-compose up
 ```
+
+URL: `http://localhost:7000/graphql`
