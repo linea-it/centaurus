@@ -3189,3 +3189,14 @@ snapshots['APITestCase::test_time_profile 1'] = {
         ]
     }
 }
+
+snapshots['APITestCase::test_processes_by_tag_id_and_field_id_and_pipeline_id 1'] = {
+    'processesByTagIdAndFieldIdAndPipelineId': [
+        {
+            'endTime': '2018-06-05T20:32:19',
+            'name': 'WAZP',
+            'processId': 10031073,
+            'startTime': '2018-06-05T20:20:53'
+        }
+    ]
+}

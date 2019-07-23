@@ -815,3 +815,15 @@ edges {
 }
         """
         self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_processes_by_tag_id_and_field_id_and_pipeline_id(self):
+        query = """
+{processesByTagIdAndFieldIdAndPipelineId (pipelineId: 214, fieldId: 40, tagId: 24){
+	processId
+  startTime
+  endTime
+  name
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)

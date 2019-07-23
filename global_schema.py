@@ -220,8 +220,12 @@ class Query(ObjectType):
         after=String(),
         first=Int(),
         last=Int())
-    processes_by_field_id_and_pipeline_id = List(
-        lambda: schemas.Processes, field_id=Int(), pipeline_id=Int()
+
+    processes_by_tag_id_and_field_id_and_pipeline_id = List(
+        lambda: schemas.Processes,
+        pipeline_id=Int(),
+        tag_id=Int(),
+        field_id=Int(),
     )
     products_by_process_id = List(lambda: schemas.Products, process_id=Int())
     process_components_by_process_id = List(
@@ -378,22 +382,36 @@ class Query(ObjectType):
 
         return result
 
-    def resolve_processes_by_field_id_and_pipeline_id(
-            self, info, pipeline_id, field_id=None):
-        query = schemas.Processes.get_query(info)
-        return query.filter_by(
-            instance=INSTANCE, flag_removed=False
+    def resolve_processes_by_tag_id_and_field_id_and_pipeline_id(
+            self, info, pipeline_id, tag_id=None, field_id=None):
+
+        query = schemas.Processes.get_query(
+            info
         ).join(
             models.ProcessPipeline
-        ).filter_by(
-            pipeline_id=pipeline_id
-        ).outerjoin(
-            models.ProcessFields
-        ).filter_by(
-            field_id=field_id
+        ).join(
+            models.ProcessStatus
         ).order_by(
             models.Processes.process_id.desc()
         )
+
+        _filters = list()
+        _filters.append(models.ProcessPipeline.pipeline_id == pipeline_id)
+        _filters.append(models.Processes.flag_removed == False)
+        _filters.append(models.Processes.instance == INSTANCE)
+        _filters.append(models.ProcessStatus.name == 'success')
+
+        if field_id or tag_id:
+            query = query.join(
+                models.ProcessFields).join(
+                models.Fields)
+        if field_id:
+            _filters.append(models.ProcessFields.field_id == field_id)
+        if tag_id:
+            query = query.join(models.ReleaseTag)
+            _filters.append(models.ReleaseTag.tag_id == tag_id)
+
+        return query.filter(and_(*_filters))
 
     def resolve_products_by_process_id(self, info, process_id):
         query = schemas.Products.get_query(info)
