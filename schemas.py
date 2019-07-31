@@ -8,7 +8,6 @@ from sqlalchemy import func
 from database import db_session
 
 import models
-from views import PipelinesExecution as PipelinesExecutionModel
 import utils
 import os
 
@@ -311,68 +310,25 @@ class ProcessComponent(SQLAlchemyObjectType, ProcessComponentAttribute):
         interfaces = (relay.Node,)
 
 
-class ProcessExecutionNode(ObjectType):
-    """Process execution node"""
-    process_count = Int()
-    last_process_id = Int()
-    start_time = DateTime()
-    end_time = DateTime()
-    status = String()
-
-
-class PipelinesExecutionAttribute():
-    pipeline_id = Int(description="Pipeline unique ID number")
-    display_name = String()
-    name = String()
-    pipeline_stage_id = Int()
-    field_id = Int()
-    process = Field(ProcessExecutionNode)
-
-
-class PipelinesExecution(SQLAlchemyObjectType, PipelinesExecutionAttribute):
-    """Pipelines execution node"""
-
+class PipelinesExecution(ObjectType):
     class Meta:
-        model = PipelinesExecutionModel
         interfaces = (relay.Node,)
 
-    def resolve_process(self, info):
+    pipeline_id = Int(description="Pipeline unique ID number")
+    pipeline_name = String()
+    pipeline_display_name = String()
+    stage_display_name = String()
+    process_count = String()
+    last_process_id = Int()
 
-        subproc = db_session.query(
-            models.Pipelines.pipeline_id,
-            func.count(func.distinct(models.Processes.process_id)).label('process_count'),
-            func.max(models.Processes.process_id).label('last_process_id')
-        ).filter_by(
-            pipeline_stage_id=self.pipeline_stage_id
-        ).filter_by(
-            pipeline_id=self.pipeline_id
-        ).join(
-            models.Pipelines.processes
-        ).filter_by(
-            flag_removed=False, instance=INSTANCE
-        ).outerjoin(
-            models.Processes.fields
-        ).filter_by(
-            field_id=self.field_id
-        ).group_by(
-            models.Pipelines.pipeline_id
-        ).subquery()
+    last_process_start_time = DateTime()
+    last_process_end_time = DateTime()
+    last_process_status = String()
 
-        proc = db_session.query(
-            models.Processes.start_time,
-            models.Processes.end_time,
-            models.ProcessStatus.name.label('status'),
-            subproc.c.process_count,
-            subproc.c.last_process_id
-        ).join(
-            subproc, models.Processes.process_id == subproc.c.last_process_id
-        ).join(
-            models.ProcessStatus
-        ).one_or_none()
 
-        procexec = proc._asdict() if proc else {}
-
-        return ProcessExecutionNode(**procexec)
+class PipelinesExecutionConnection(relay.Connection):
+    class Meta:
+        node = PipelinesExecution
 
 
 class CommentsAttribute():
@@ -690,3 +646,33 @@ class ProcessPipeline(SQLAlchemyObjectType, ProcessPipelineAttribute):
     class Meta:
         model = models.ProcessPipeline
         interfaces = (relay.Node,)
+
+
+class GitInfo(ObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+
+    current_branch = String()
+    last_commit = String()
+    last_commit_date = String()
+    last_commit_author = String()
+    last_tag = String()
+
+
+class GitInfoConnection(relay.Connection):
+    class Meta:
+        node = GitInfo
+
+
+class TimeProfile(ObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+
+    display_name = String()
+    module_name = String()
+    jobs = List(JobRuns)
+
+
+class TimeProfileConnection(relay.Connection):
+    class Meta:
+        node = TimeProfile

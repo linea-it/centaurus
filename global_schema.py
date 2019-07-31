@@ -1,16 +1,17 @@
 from graphene_sqlalchemy import SQLAlchemyConnectionField
 from graphene import (
     Schema, ObjectType, Field, List, String, Int, Boolean,
-    Argument, InputObjectType
+    Argument, InputObjectType, relay
 )
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, func
+import subprocess
 
 import models
-import views
 import schemas
 import utils
 import os
 
+from database import db_session
 
 INSTANCE = os.getenv('API_INSTANCE')
 
@@ -80,6 +81,7 @@ class SearchPipelinesModulesList(InputObjectType):
 
 class Query(ObjectType):
     """Query objects for GraphQL API"""
+    node = relay.Node.Field()
 
     # gets all entries
     product_class_list = SQLAlchemyConnectionField(
@@ -209,11 +211,21 @@ class Query(ObjectType):
         tag_id=Int(),
         only_available=Boolean()
     )
-    pipelines_by_field_id_and_stage_id = List(
-        lambda: schemas.PipelinesExecution, stage_id=Int(), field_id=Int()
-    )
-    processes_by_field_id_and_pipeline_id = List(
-        lambda: schemas.Processes, field_id=Int(), pipeline_id=Int()
+    pipelines_by_stage_id_and_tag_id_and_field_id = relay.ConnectionField(
+        schemas.PipelinesExecutionConnection,
+        stage_id=Int(),
+        tag_id=Int(),
+        field_id=Int(),
+        before=String(),
+        after=String(),
+        first=Int(),
+        last=Int())
+
+    processes_by_tag_id_and_field_id_and_pipeline_id = List(
+        lambda: schemas.Processes,
+        pipeline_id=Int(),
+        tag_id=Int(),
+        field_id=Int(),
     )
     products_by_process_id = List(lambda: schemas.Products, process_id=Int())
     process_components_by_process_id = List(
@@ -223,6 +235,10 @@ class Query(ObjectType):
     fields_by_tagname = List(lambda: schemas.Fields, tagname=String())
     product_class_by_type_id = List(
         lambda: schemas.ProductClass, type_id=Int())
+    git_info = relay.ConnectionField(schemas.GitInfoConnection)
+    time_profile = relay.ConnectionField(
+        schemas.TimeProfileConnection,
+        process_id=Int())
 
     def resolve_product_class_list(self, info, sort=list(),
                                    search=None, **args):
@@ -305,44 +321,97 @@ class Query(ObjectType):
 
         return query.order_by(*sort)
 
-    def resolve_pipelines_by_field_id_and_stage_id(
-            self, info, stage_id, field_id=None):
-        query = schemas.PipelinesExecution.get_query(info)
+    def resolve_pipelines_by_stage_id_and_tag_id_and_field_id(
+            self, info, stage_id=None, tag_id=None, field_id=None, **args):
 
-        return query.filter_by(
-            pipeline_stage_id=stage_id, instance=INSTANCE
-        ).filter_by(
-            field_id=field_id
-        ).join(
+        sub_query = db_session.query(
+            func.distinct(models.Pipelines.pipeline_id).label('pipeline_id'),
+            models.Pipelines.name.label('pipeline_name'),
+            models.Pipelines.display_name.label('pipeline_display_name'),
+            models.PipelineStage.display_name.label('stage_display_name'),
+            func.count(func.distinct(models.Processes.process_id)).label('process_count'),
+            func.max(models.Processes.process_id).label('last_process_id')
+        ).select_from(
             models.Pipelines
         ).join(
-            models.PipelineStatus
-        ).filter_by(
-            name='enabled'
-        ).join(
             models.Pipelines.processes
-        ).filter_by(
-            flag_removed=False
+        ).join(
+            models.PipelineStage
+        ).join(
+            models.ProcessStatus
+        ).group_by(
+            models.Pipelines.pipeline_id,
+            models.PipelineStage.pipeline_stage_id
         ).order_by(
-            views.PipelinesExecution.name
+            models.PipelineStage.display_name, models.Pipelines.display_name
         )
 
-    def resolve_processes_by_field_id_and_pipeline_id(
-            self, info, pipeline_id, field_id=None):
-        query = schemas.Processes.get_query(info)
-        return query.filter_by(
-            instance=INSTANCE, flag_removed=False
+        _filters = list()
+        _filters.append(models.Processes.flag_removed == False)
+        _filters.append(models.Processes.instance == INSTANCE)
+        _filters.append(models.ProcessStatus.name == 'success')
+
+        # The link between the table processes and release_tag table depends on
+        # the table fields
+        if field_id or tag_id:
+            sub_query = sub_query.join(
+                models.ProcessFields).join(
+                models.Fields)
+        if field_id:
+            _filters.append(models.ProcessFields.field_id == field_id)
+        if tag_id:
+            sub_query = sub_query.join(models.ReleaseTag)
+            _filters.append(models.ReleaseTag.tag_id == tag_id)
+        if stage_id:
+            _filters.append(models.Pipelines.pipeline_stage_id == stage_id)
+        sub_query = sub_query.filter(and_(*_filters)).subquery()
+
+        query = db_session.query(
+            sub_query,
+            models.Processes.start_time.label('last_process_start_time'),
+            models.Processes.end_time.label('last_process_end_time'),
+            models.ProcessStatus.name.label('last_process_status'),
+        ).join(
+            sub_query,
+            models.Processes.process_id == sub_query.c.last_process_id).join(
+            models.ProcessStatus).all()
+
+        result = list()
+        for row in query:
+            result.append(schemas.PipelinesExecution(**row._asdict()))
+
+        return result
+
+    def resolve_processes_by_tag_id_and_field_id_and_pipeline_id(
+            self, info, pipeline_id, tag_id=None, field_id=None):
+
+        query = schemas.Processes.get_query(
+            info
         ).join(
             models.ProcessPipeline
-        ).filter_by(
-            pipeline_id=pipeline_id
-        ).outerjoin(
-            models.ProcessFields
-        ).filter_by(
-            field_id=field_id
+        ).join(
+            models.ProcessStatus
         ).order_by(
             models.Processes.process_id.desc()
         )
+
+        _filters = list()
+        _filters.append(models.ProcessPipeline.pipeline_id == pipeline_id)
+        _filters.append(models.Processes.flag_removed == False)
+        _filters.append(models.Processes.instance == INSTANCE)
+        _filters.append(models.ProcessStatus.name == 'success')
+
+        if field_id or tag_id:
+            query = query.join(
+                models.ProcessFields).join(
+                models.Fields)
+        if field_id:
+            _filters.append(models.ProcessFields.field_id == field_id)
+        if tag_id:
+            query = query.join(models.ReleaseTag)
+            _filters.append(models.ReleaseTag.tag_id == tag_id)
+
+        return query.filter(and_(*_filters))
 
     def resolve_products_by_process_id(self, info, process_id):
         query = schemas.Products.get_query(info)
@@ -553,6 +622,67 @@ class Query(ObjectType):
     def resolve_modules_by_name(self, info, name):
         query = schemas.Modules.get_query(info)
         return query.filter(models.Modules.name == name).one_or_none()
+
+    def resolve_git_info(self, info, **args):
+        current_branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"]).strip()
+        last_commit = subprocess.check_output(
+            ["git", "log", "-1", "--format=%H"]).strip()
+        last_commit_date = subprocess.check_output(
+            ["git", "log", "-1", "--format=%cd"]).strip()
+        last_commit_author = subprocess.check_output(
+            ["git", "log", "-1", "--pretty=format:%an"]).strip()
+        last_tag = subprocess.check_output(
+            ["git", "describe", "--tags"]).strip()
+
+        return [schemas.GitInfo(
+            current_branch=current_branch.decode("utf-8"),
+            last_commit=last_commit.decode("utf-8"),
+            last_commit_date=last_commit_date.decode("utf-8"),
+            last_commit_author=last_commit_author.decode("utf-8"),
+            last_tag=last_tag.decode("utf-8")
+        )]
+
+    def resolve_time_profile(self, info, process_id, **args):
+        l_modules = list()
+
+        modules = db_session.query(
+            func.distinct(models.Modules.module_id).label('module_id'),
+            models.Modules.name.label('name'),
+            models.Modules.display_name.label('display_name')
+        ).select_from(
+            models.JobRuns
+        ).join(
+            models.Modules
+        ).filter(
+            models.JobRuns.process_id == process_id
+        ).all()
+
+        for module in modules:
+            query = db_session.query(
+                models.JobRuns.hid.label('hid'),
+                models.JobRuns.start_time.label('start_time'),
+                models.JobRuns.end_time.label('end_time')
+            ).select_from(
+                models.JobRuns
+            ).join(
+                models.Modules
+            ).filter(
+                models.JobRuns.process_id == process_id,
+                models.Modules.module_id == module.module_id
+            ).all()
+
+            jobs = list()
+            for row in query:
+                jobs.append(schemas.JobRuns(**row._asdict()))
+
+            l_modules.append(schemas.TimeProfile(
+                display_name=module.display_name,
+                module_name=module.name,
+                jobs=jobs
+            ))
+
+        return l_modules
 
 
 schema = Schema(query=Query)

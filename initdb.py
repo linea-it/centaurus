@@ -1,9 +1,6 @@
 # coding: utf-8
 from sqlalchemy import DDL, event
 from database import engine, db_session, Base
-from sqlalchemy import Table
-from sqlalchemy.sql import text
-from sqlalchemy_views import CreateView
 
 import json
 
@@ -73,24 +70,3 @@ for item in classes:
     if not has_table(item.__tablename__, item.__table__.schema):
         item.metadata.create_all(bind=engine, tables=[item.__table__])
         ingest_json(item)
-
-
-# view created to show information about general pipelines execution
-view = Table('vw_pipelines_execution', Base.metadata)
-
-definition = text(str(
-    "SELECT DISTINCT pipelines.pipeline_id, "
-    "pipelines.display_name, "
-    "pipelines.name, "
-    "pipelines.pipeline_stage_id, "
-    "coadd.process_fields.field_id, "
-    "processes.instance "
-    "FROM pipelines "
-    "INNER JOIN process_pipeline ON pipelines.pipeline_id = process_pipeline.pipeline_id "
-    "INNER JOIN processes ON processes.process_id = process_pipeline.process_id "
-    "LEFT JOIN coadd.process_fields ON coadd.process_fields.process_id = processes.process_id"
-))
-
-vw_pipelines_execution = CreateView(view, definition, or_replace=True)
-vw_pipelines_execution.compile()
-engine.execute(vw_pipelines_execution)

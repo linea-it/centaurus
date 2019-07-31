@@ -754,3 +754,76 @@ edges {
         }}
         """
         self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_pipelines_no_args(self):
+        query = """
+{pipelinesByStageIdAndTagIdAndFieldId (first: 3){
+  edges {
+    node {
+      pipelineId
+      pipelineName
+      pipelineDisplayName
+      stageDisplayName
+      processCount
+      lastProcessId
+      lastProcessStartTime
+      lastProcessEndTime
+      lastProcessStatus
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_pipelines_by_stage_id_and_tag_id_and_field_id(self):
+        query = """
+{pipelinesByStageIdAndTagIdAndFieldId (first: 3, stageId: 9, fieldId: 40, tagId: 24){
+  edges {
+    node {
+      pipelineId
+      pipelineName
+      pipelineDisplayName
+      stageDisplayName
+      processCount
+      lastProcessId
+      lastProcessStartTime
+      lastProcessEndTime
+      lastProcessStatus
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_time_profile(self):
+        query = """
+{timeProfile(processId: 10031073, first: 2){
+  edges{
+    node{
+      displayName
+      moduleName
+			jobs {
+        hid
+        startTime
+        endTime
+      }
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_processes_by_tag_id_and_field_id_and_pipeline_id(self):
+        query = """
+{processesByTagIdAndFieldIdAndPipelineId (pipelineId: 214, fieldId: 40, tagId: 24){
+	processId
+  startTime
+  endTime
+  name
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
