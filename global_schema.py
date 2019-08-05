@@ -240,6 +240,9 @@ class Query(ObjectType):
         schemas.TimeProfileConnection,
         process_id=Int())
 
+    output_classes_by_pipeline = relay.ConnectionField(
+        schemas.ClassesByPipelineConnection,
+        pipeline_id=Int())
     def resolve_product_class_list(self, info, sort=list(),
                                    search=None, **args):
         query = schemas.ProductClass.get_query(info)
@@ -680,6 +683,48 @@ class Query(ObjectType):
                 display_name=module.display_name,
                 module_name=module.name,
                 jobs=jobs
+            ))
+
+        return l_modules
+
+    def resolve_output_classes_by_pipeline(self, info, pipeline_id, **args):
+        l_modules = list()
+
+        query = db_session.query(
+            func.distinct(models.Modules.module_id).label('module_id'),
+            models.Modules.name.label('module_name'),
+            models.Modules.display_name.label('display_name')
+        ).select_from(
+            models.Modules
+        ).join(
+            models.ModuleOutput
+        ).join(
+            models.PipelinesModules
+        ).join(
+            models.Pipelines
+        ).filter(
+            models.Pipelines.pipeline_id == pipeline_id
+        )
+
+        for module in query.all():
+            query = db_session.query(
+                models.ProductClass.display_name
+            ).select_from(
+                models.ProductClass
+            ).join(
+                models.ModuleOutput
+            ).filter(
+                models.ModuleOutput.module_id == module.module_id
+            )
+
+            _products = list()
+            for row in query.all():
+                _products.append(row.display_name)
+
+            l_modules.append(schemas.ProductsByPipeline(
+                display_name=module.display_name,
+                module_name=module.module_name,
+                products=_products
             ))
 
         return l_modules

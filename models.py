@@ -535,3 +535,40 @@ class Filters(Base):
     lambda_min = Column(Float)
     lambda_max = Column(Float)
     lambda_mean = Column(Float)
+
+
+class ModuleInput(Base):
+    __tablename__ = 'module_input'
+
+    module_id = Column(ForeignKey('modules.module_id'), primary_key=True, nullable=False)
+    input_class_id = Column(ForeignKey('product_class.class_id'), primary_key=True, nullable=False)
+    optional = Column(Boolean, nullable=False, server_default=text("false"))
+    multivalue = Column(Boolean, nullable=False, server_default=text("false"))
+    exportable = Column(Boolean, nullable=False, server_default=text("false"))
+
+    _class = relationship('ProductClass')
+    module = relationship('Modules')
+
+
+class ModuleOutput(Base):
+    __tablename__ = 'module_output'
+
+    module_id = Column(ForeignKey('modules.module_id'), primary_key=True, nullable=False)
+    output_class_id = Column(ForeignKey('product_class.class_id'), primary_key=True, nullable=False)
+
+    _class = relationship('ProductClass')
+    module = relationship('Modules')
+
+
+class PipelineInput(Base):
+    __tablename__ = 'pipeline_input'
+    __table_args__ = (
+        UniqueConstraint('pipeline_id', 'module_id', 'input_class_id'),
+    )
+
+    pipeline_id = Column(ForeignKey('pipelines.pipeline_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    module_id = Column(ForeignKey('modules.module_id'), primary_key=True, nullable=False)
+    input_class_id = Column(ForeignKey('product_class.class_id'), primary_key=True, nullable=False)
+    optional = Column(Boolean, nullable=False, server_default=text("false"))
+    multivalue = Column(Boolean, nullable=False, server_default=text("false"))
+    exportable = Column(Boolean, nullable=False, server_default=text("false"))

@@ -11,7 +11,8 @@ from models import (
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
     Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
     PipelinesModules, ProcessComponent, Comments, Mask, Map,
-    CatalogStatus, Catalog, SavedProcesses, ProductField, Filters
+    CatalogStatus, Catalog, SavedProcesses, ProductField, Filters,
+    ModuleInput, ModuleOutput, PipelineInput
 )
 
 event.listen(
@@ -63,7 +64,8 @@ classes = [
     PipelinesConfig, Processes, ProcessPipeline, JobRuns,
     Products, ReleaseTag, Fields, ProcessFields, ProcessInputs,
     PipelinesModules, ProcessComponent, Comments, Mask, Map,
-    CatalogStatus, Catalog, SavedProcesses, ProductField, Filters
+    CatalogStatus, Catalog, SavedProcesses, ProductField, Filters,
+    ModuleInput, ModuleOutput, PipelineInput
 ]
 
 for item in classes:
