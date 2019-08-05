@@ -684,7 +684,7 @@ class ClassesByPipeline(ObjectType):
 
     display_name = String()
     module_name = String()
-    products = List(String)
+    classes = List(String)
 
 
 class ClassesByPipelineConnection(relay.Connection):

@@ -721,14 +721,14 @@ class Query(ObjectType):
                 models.ModuleOutput.module_id == module.module_id
             )
 
-            _products = list()
+            _classes = list()
             for row in query.all():
-                _products.append(row.display_name)
+                _classes.append(row.display_name)
 
-            l_modules.append(schemas.ProductsByPipeline(
+            l_modules.append(schemas.ClassesByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
-                products=_products
+                classes=_classes
             ))
 
         return l_modules
@@ -766,14 +766,14 @@ class Query(ObjectType):
                 )
             )
 
-            _products = list()
+            _classes = list()
             for row in query.all():
-                _products.append(row.display_name)
+                _classes.append(row.display_name)
 
-            l_modules.append(schemas.ProductsByPipeline(
+            l_modules.append(schemas.ClassesByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
-                products=_products
+                classes=_classes
             ))
 
         # get modules from module_input
@@ -807,14 +807,14 @@ class Query(ObjectType):
                 models.ModuleInput.module_id == module.module_id
             )
 
-            _products = list()
+            _classes = list()
             for row in query.all():
-                _products.append(row.display_name)
+                _classes.append(row.display_name)
 
-            l_modules.append(schemas.ProductsByPipeline(
+            l_modules.append(schemas.ClassesByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
-                products=_products
+                classes=_classes
             ))
 
         return l_modules

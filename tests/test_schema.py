@@ -827,3 +827,32 @@ edges {
 }
         """
         self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_output_classes_by_pipeline(self):
+        query = """
+{outputClassesByPipeline(pipelineId:200){
+  edges{
+    node {
+      displayName
+      classes
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
+
+    def test_input_classes_by_pipeline(self):
+        query = """
+{inputClassesByPipeline(pipelineId:176) {
+  edges {
+    node {
+      displayName
+      moduleName
+      classes
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)

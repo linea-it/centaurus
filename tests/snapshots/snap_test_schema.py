@@ -3200,3 +3200,100 @@ snapshots['APITestCase::test_processes_by_tag_id_and_field_id_and_pipeline_id 1'
         }
     ]
 }
+
+snapshots['APITestCase::test_input_classes_by_pipeline 1'] = {
+    'inputClassesByPipeline': {
+        'edges': [
+            {
+                'node': {
+                    'classes': [
+                    ],
+                    'displayName': 'Query Builder',
+                    'moduleName': 'query_builder'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'MLZ',
+                    'moduleName': 'mlz'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'ANNz',
+                    'moduleName': 'annz'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'DNF',
+                    'moduleName': 'dnf'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'BPZ',
+                    'moduleName': 'bpz'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'LePhare',
+                    'moduleName': 'lephare_new'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'Trainings Separation',
+                    'moduleName': 'photoz_separate'
+                }
+            },
+            {
+                'node': {
+                    'classes': [
+                        'Coadd Objects'
+                    ],
+                    'displayName': 'ANNz2',
+                    'moduleName': 'annz2'
+                }
+            }
+        ]
+    }
+}
+
+snapshots['APITestCase::test_output_classes_by_pipeline 1'] = {
+    'outputClassesByPipeline': {
+        'edges': [
+            {
+                'node': {
+                    'classes': [
+                        'Generic',
+                        'Cluster Catalog',
+                        'GA',
+                        'GE',
+                        'LSS'
+                    ],
+                    'displayName': 'Query Builder'
+                }
+            }
+        ]
+    }
+}
