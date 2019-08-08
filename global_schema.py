@@ -164,6 +164,8 @@ class Query(ObjectType):
         schemas.Processes,
         all_instances=Boolean(),
         running=Boolean(),
+        failure=Boolean(),
+        success=Boolean(),
         published=Boolean(),
         saved=Boolean(),
         sort=Argument(utils.sort_enum_for([
@@ -504,6 +506,8 @@ class Query(ObjectType):
             info,
             all_instances=None,
             running=None,
+            failure=None,
+            success=None,
             published=None,
             saved=None,
             sort=list(),
@@ -519,6 +523,12 @@ class Query(ObjectType):
             query = query.filter(models.Processes.end_time.is_(None))
         elif running is False:
             query = query.filter(models.Processes.end_time.isnot(None))
+
+        if failure is True:
+            query = query.filter(models.Processes.status_id == 3)
+
+        if success is True:
+            query = query.filter(models.Processes.status_id == 1)
 
         if published is True:
             query = query.filter(models.Processes.published_date.isnot(None))
