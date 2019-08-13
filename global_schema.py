@@ -242,6 +242,13 @@ class Query(ObjectType):
         schemas.TimeProfileConnection,
         process_id=Int())
 
+    output_classes_by_pipeline = relay.ConnectionField(
+        schemas.ClassesByPipelineConnection,
+        pipeline_id=Int())
+    input_classes_by_pipeline = relay.ConnectionField(
+        schemas.ClassesByPipelineConnection,
+        pipeline_id=Int())
+
     def resolve_product_class_list(self, info, sort=list(),
                                    search=None, **args):
         query = schemas.ProductClass.get_query(info)
@@ -690,6 +697,134 @@ class Query(ObjectType):
                 display_name=module.display_name,
                 module_name=module.name,
                 jobs=jobs
+            ))
+
+        return l_modules
+
+    def resolve_output_classes_by_pipeline(self, info, pipeline_id, **args):
+        l_modules = list()
+
+        query = db_session.query(
+            func.distinct(models.Modules.module_id).label('module_id'),
+            models.Modules.name.label('module_name'),
+            models.Modules.display_name.label('display_name')
+        ).select_from(
+            models.Modules
+        ).join(
+            models.ModuleOutput
+        ).join(
+            models.PipelinesModules
+        ).join(
+            models.Pipelines
+        ).filter(
+            models.Pipelines.pipeline_id == pipeline_id
+        )
+
+        for module in query.all():
+            query = db_session.query(
+                models.ProductClass.display_name
+            ).select_from(
+                models.ProductClass
+            ).join(
+                models.ModuleOutput
+            ).filter(
+                models.ModuleOutput.module_id == module.module_id
+            )
+
+            _classes = list()
+            for row in query.all():
+                _classes.append(row.display_name)
+
+            l_modules.append(schemas.ClassesByPipeline(
+                display_name=module.display_name,
+                module_name=module.module_name,
+                classes=_classes
+            ))
+
+        return l_modules
+
+    def resolve_input_classes_by_pipeline(self, info, pipeline_id, **args):
+        l_modules = list()
+        l_modules_from_pipeline_input = set()
+
+        # get modules from pipeline_input
+        query = db_session.query(
+            func.distinct(models.PipelineInput.module_id).label('module_id'),
+            models.Modules.name.label('module_name'),
+            models.Modules.display_name.label('display_name')
+        ).select_from(
+            models.PipelineInput
+        ).join(
+            models.Modules
+        ).filter(
+            models.Pipelines.pipeline_id == pipeline_id
+        )
+
+        for module in query.all():
+            l_modules_from_pipeline_input.add(module.module_id)
+
+            query = db_session.query(
+                models.ProductClass.display_name
+            ).select_from(
+                models.ProductClass
+            ).join(
+                models.PipelineInput
+            ).filter(
+                and_(
+                    models.PipelineInput.module_id == module.module_id,
+                    models.PipelineInput.pipeline_id == pipeline_id
+                )
+            )
+
+            _classes = list()
+            for row in query.all():
+                _classes.append(row.display_name)
+
+            l_modules.append(schemas.ClassesByPipeline(
+                display_name=module.display_name,
+                module_name=module.module_name,
+                classes=_classes
+            ))
+
+        # get modules from module_input
+        query = db_session.query(
+            func.distinct(models.Modules.module_id).label('module_id'),
+            models.Modules.name.label('module_name'),
+            models.Modules.display_name.label('display_name')
+        ).select_from(
+            models.Modules
+        ).join(
+            models.ModuleInput
+        ).join(
+            models.PipelinesModules
+        ).join(
+            models.Pipelines
+        ).filter(
+            models.Pipelines.pipeline_id == pipeline_id
+        )
+
+        for module in query.all():
+            if module.module_id in l_modules_from_pipeline_input:
+                continue
+
+            query = db_session.query(
+                models.ProductClass.display_name
+            ).select_from(
+                models.ProductClass
+            ).join(
+                models.ModuleInput
+            ).filter(
+                models.ModuleInput.module_id == module.module_id
+            )
+
+            _classes = list()
+            for row in query.all():
+                _classes.append(row.display_name)
+
+            l_modules.append(schemas.ClassesByPipeline(
+                display_name=module.display_name,
+                module_name=module.module_name,
+                classes=_classes
             ))
 
         return l_modules

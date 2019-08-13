@@ -1,0 +1,10 @@
+[  
+    {  
+      "pipeline_id":200,
+      "module_id":469,
+      "input_class_id":11,
+      "optional":true,
+      "multivalue":false,
+      "exportable":false
+    }
+  ]
