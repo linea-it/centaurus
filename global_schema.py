@@ -358,7 +358,6 @@ class Query(ObjectType):
         _filters = list()
         _filters.append(models.Processes.flag_removed == False)
         _filters.append(models.Processes.instance == INSTANCE)
-        _filters.append(models.ProcessStatus.name == 'success')
 
         # The link between the table processes and release_tag table depends on
         # the table fields
@@ -408,7 +407,6 @@ class Query(ObjectType):
         _filters.append(models.ProcessPipeline.pipeline_id == pipeline_id)
         _filters.append(models.Processes.flag_removed == False)
         _filters.append(models.Processes.instance == INSTANCE)
-        _filters.append(models.ProcessStatus.name == 'success')
 
         if field_id or tag_id:
             query = query.join(
