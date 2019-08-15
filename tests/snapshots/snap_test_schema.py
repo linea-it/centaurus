@@ -3297,3 +3297,100 @@ snapshots['APITestCase::test_output_classes_by_pipeline 1'] = {
         ]
     }
 }
+
+snapshots['APITestCase::test_input_products_by_pipeline 1'] = {
+    'inputProductsByPipeline': {
+        'edges': [
+            {
+                'node': {
+                    'displayName': 'Query Builder',
+                    'moduleName': 'query_builder',
+                    'products': [
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'MLZ',
+                    'moduleName': 'mlz',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'ANNz',
+                    'moduleName': 'annz',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'DNF',
+                    'moduleName': 'dnf',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'BPZ',
+                    'moduleName': 'bpz',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'LePhare',
+                    'moduleName': 'lephare_new',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'Trainings Separation',
+                    'moduleName': 'photoz_separate',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            },
+            {
+                'node': {
+                    'displayName': 'ANNz2',
+                    'moduleName': 'annz2',
+                    'products': [
+                        'Coadd Objects'
+                    ]
+                }
+            }
+        ]
+    }
+}
+
+snapshots['APITestCase::test_output_products_by_pipeline 1'] = {
+    'outputProductsByPipeline': {
+        'edges': [
+            {
+                'node': {
+                    'displayName': 'Query Builder',
+                    'products': [
+                        'Generic',
+                        'Cluster Catalog',
+                        'GA',
+                        'GE',
+                        'LSS'
+                    ]
+                }
+            }
+        ]
+    }
+}

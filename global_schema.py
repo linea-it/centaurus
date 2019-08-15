@@ -242,11 +242,11 @@ class Query(ObjectType):
         schemas.TimeProfileConnection,
         process_id=Int())
 
-    output_classes_by_pipeline = relay.ConnectionField(
-        schemas.ClassesByPipelineConnection,
+    output_products_by_pipeline = relay.ConnectionField(
+        schemas.ProductsByPipelineConnection,
         pipeline_id=Int())
-    input_classes_by_pipeline = relay.ConnectionField(
-        schemas.ClassesByPipelineConnection,
+    input_products_by_pipeline = relay.ConnectionField(
+        schemas.ProductsByPipelineConnection,
         pipeline_id=Int())
 
     def resolve_product_class_list(self, info, sort=list(),
@@ -701,7 +701,7 @@ class Query(ObjectType):
 
         return l_modules
 
-    def resolve_output_classes_by_pipeline(self, info, pipeline_id, **args):
+    def resolve_output_products_by_pipeline(self, info, pipeline_id, **args):
         l_modules = list()
 
         query = db_session.query(
@@ -731,19 +731,19 @@ class Query(ObjectType):
                 models.ModuleOutput.module_id == module.module_id
             )
 
-            _classes = list()
+            _products = list()
             for row in query.all():
-                _classes.append(row.display_name)
+                _products.append(row.display_name)
 
-            l_modules.append(schemas.ClassesByPipeline(
+            l_modules.append(schemas.ProductsByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
-                classes=_classes
+                products=_products
             ))
 
         return l_modules
 
-    def resolve_input_classes_by_pipeline(self, info, pipeline_id, **args):
+    def resolve_input_products_by_pipeline(self, info, pipeline_id, **args):
         l_modules = list()
         l_modules_from_pipeline_input = set()
 
@@ -776,14 +776,14 @@ class Query(ObjectType):
                 )
             )
 
-            _classes = list()
+            _products = list()
             for row in query.all():
-                _classes.append(row.display_name)
+                _products.append(row.display_name)
 
-            l_modules.append(schemas.ClassesByPipeline(
+            l_modules.append(schemas.ProductsByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
-                classes=_classes
+                products=_products
             ))
 
         # get modules from module_input
@@ -817,14 +817,14 @@ class Query(ObjectType):
                 models.ModuleInput.module_id == module.module_id
             )
 
-            _classes = list()
+            _products = list()
             for row in query.all():
-                _classes.append(row.display_name)
+                _products.append(row.display_name)
 
-            l_modules.append(schemas.ClassesByPipeline(
+            l_modules.append(schemas.ProductsByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
-                classes=_classes
+                products=_products
             ))
 
         return l_modules

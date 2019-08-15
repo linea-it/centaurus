@@ -828,13 +828,13 @@ edges {
         """
         self.assertMatchSnapshot(schema.execute(query).data)
 
-    def test_output_classes_by_pipeline(self):
+    def test_output_products_by_pipeline(self):
         query = """
-{outputClassesByPipeline(pipelineId:200){
+{outputProductsByPipeline(pipelineId:200){
   edges{
     node {
       displayName
-      classes
+      products
     }
   }
 }
@@ -842,14 +842,14 @@ edges {
         """
         self.assertMatchSnapshot(schema.execute(query).data)
 
-    def test_input_classes_by_pipeline(self):
+    def test_input_products_by_pipeline(self):
         query = """
-{inputClassesByPipeline(pipelineId:176) {
+{inputProductsByPipeline(pipelineId:176) {
   edges {
     node {
       displayName
       moduleName
-      classes
+      products
     }
   }
 }
