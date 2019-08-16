@@ -678,15 +678,15 @@ class TimeProfileConnection(relay.Connection):
         node = TimeProfile
 
 
-class ClassesByPipeline(ObjectType):
+class ProductsByPipeline(ObjectType):
     class Meta:
         interfaces = (relay.Node,)
 
     display_name = String()
     module_name = String()
-    classes = List(String)
+    products = List(String)
 
 
-class ClassesByPipelineConnection(relay.Connection):
+class ProductsByPipelineConnection(relay.Connection):
     class Meta:
-        node = ClassesByPipeline
+        node = ProductsByPipeline
