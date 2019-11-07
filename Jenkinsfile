@@ -4,8 +4,7 @@ pipeline {
         registryCredential = 'Dockerhub'
         dockerImage = ''
         deployment = 'centaurus'
-        namespace = 'scienceportal-dev'
-        namespace_prod = 'scienceportal'
+        namespace = 'centaurus'
     }
     agent any
 
@@ -38,7 +37,7 @@ pipeline {
                     -H \"content-type: application/json\" \
                     -H \"X-Rundeck-Auth-Token: $RD_AUTH_TOKEN\" \
                     -d '{\"argString\": \"-namespace $namespace -image $registry:$GIT_COMMIT -deployment $deployment\"}' \
-                    https://fox.linea.gov.br/api/1/job/e79ea1f7-e156-4992-98b6-75995ac4c15a/executions
+                    https://run.linea.gov.br/api/1/job/793311e5-4f81-4ff2-9dd5-1ca58da79e14/executions
                   """
             }
         }
@@ -61,7 +60,7 @@ pipeline {
                     -H \"content-type: application/json\" \
                     -H \"X-Rundeck-Auth-Token: $RD_AUTH_TOKEN\" \
                     -d '{\"argString\": \"-namespace $namespace_prod -image $registry:$TAG_NAME -deployment $deployment\"}' \
-                    https://fox.linea.gov.br/api/1/job/e79ea1f7-e156-4992-98b6-75995ac4c15a/executions
+                    https://run.linea.gov.br/api/1/job/793311e5-4f81-4ff2-9dd5-1ca58da79e14/executions
                   """
             }
         }
