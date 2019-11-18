@@ -1,6 +1,6 @@
 # Centaurus
 
-This API is used to visualize data from LIneA's Science Portal
+This API is used to visualize data from LIneA's Science Portal!
 
 ## Docker installation
 
