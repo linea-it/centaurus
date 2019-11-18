@@ -1,9 +1,9 @@
 pipeline {
 	environment {
-		registry = "linea/andromeda"
+		registry = "linea/centaurus"
 		registryCredential = 'Dockerhub'
 		dockerImage = ''
-		deployment = 'andromeda'
+		deployment = 'centaurus'
 		namespace = 'condor-monitor'
 	}
   agent any
@@ -31,7 +31,7 @@ pipeline {
             -H \"content-type: application/json\" \
             -H \"X-Rundeck-Auth-Token: $RD_AUTH_TOKEN\" \
             -d '{\"argString\": \"-namespace $namespace -image $registry:$GIT_COMMIT -deployment $deployment\"}' \
-            https://run.linea.gov.br/api/1/job/c1cd3d02-d1d7-47f1-b503-4d97a4755df6/executions
+            https://run.linea.gov.br/api/1/job/0b1c0a88-4137-43f5-aa11-4bf6f3382db0/executions
           """
         }
       }
