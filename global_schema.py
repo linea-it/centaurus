@@ -167,6 +167,7 @@ class Query(ObjectType):
         failure=Boolean(),
         success=Boolean(),
         published=Boolean(),
+        removed=Boolean(),
         saved=Boolean(),
         sort=Argument(utils.sort_enum_for([
             models.Processes, models.TgUser, models.Fields,
@@ -515,11 +516,17 @@ class Query(ObjectType):
             success=None,
             published=None,
             saved=None,
+            removed=False,
             sort=list(),
             search=None,
             **args):
 
-        query = schemas.Processes.get_query(info).filter_by(flag_removed=False)
+        query = schemas.Processes.get_query(info)
+
+        if removed is False:
+            query = query.filter_by(flag_removed=False)
+        else:
+            query = query.filter(models.Processes.flag_removed.isnot(False))
 
         if not all_instances:
             query = query.filter_by(instance=INSTANCE)
@@ -539,6 +546,9 @@ class Query(ObjectType):
             query = query.filter(models.Processes.published_date.isnot(None))
         elif published is False:
             query = query.filter(models.Processes.published_date.is_(None))
+
+        if removed is True:
+            query = query.filter(models.Processes.flag_removed.isnot(False))
 
         if saved is True:
             query = query.join(models.SavedProcesses)
