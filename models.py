@@ -2,7 +2,7 @@
 
 from database import Base
 from sqlalchemy import (
-    BigInteger, Boolean, CheckConstraint, Column, DateTime, Date, 
+    BigInteger, Boolean, CheckConstraint, Column, DateTime, Date,
     SmallInteger, Integer, String, Text, text, Sequence, Float,
     ForeignKey, UniqueConstraint
 )
@@ -205,6 +205,8 @@ class Pipelines(Base):
     user = relationship('TgUser')
 
     processes = relationship('Processes', secondary='process_pipeline')
+    user_manual = Column(Text)
+    pipeline_history = Column(Text)
 
 
 class Processes(Base):

@@ -72,6 +72,8 @@ class PipelinesAttribute():
     readme = String(description="Document describing how the pipeline works.")
     any_output_class = Boolean()
     processes = List(lambda: Processes)
+    user_manual = String(description="User manual")
+    pipeline_history = String(description="Pipeline history")
 
 
 class Pipelines(SQLAlchemyObjectType, PipelinesAttribute):

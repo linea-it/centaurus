@@ -45,6 +45,8 @@ class APITestCase(TestCase):
         pipelineStatusId
         multidataset
         readme
+        userManual
+        pipelineHistory
         anyOutputClass
         group {
           groupId
@@ -544,6 +546,8 @@ catalogList (first: 3){
         displayName
       }
       readme
+      userManual
+      pipelineHistory
     }
   }
 }

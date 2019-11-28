@@ -1083,6 +1083,8 @@ snapshots['APITestCase::test_pipelines_all_fields 1'] = {
                         }
                     ],
                     'readme': None,
+                    'userManual': None,
+                    'pipelineHistory': None,
                     'user': {
                         'userId': 1
                     },
@@ -1292,6 +1294,8 @@ snapshots['APITestCase::test_pipelines_all_fields 1'] = {
                         }
                     ],
                     'readme': None,
+                    'userManual': None,
+                    'pipelineHistory': None,
                     'user': {
                         'userId': 1
                     },
@@ -1357,6 +1361,8 @@ snapshots['APITestCase::test_pipelines_all_fields 1'] = {
                     'processes': [
                     ],
                     'readme': None,
+                    'userManual': None,
+                    'pipelineHistory': None,
                     'user': {
                         'userId': 1
                     },
@@ -2581,6 +2587,8 @@ snapshots['APITestCase::test_pipelines 1'] = {
                         'displayName': 'Data Installation'
                     },
                     'readme': None,
+                    'userManual': None,
+                    'pipelineHistory': None,
                     'user': {
                         'displayName': 'Test User'
                     },
@@ -2599,6 +2607,8 @@ snapshots['APITestCase::test_pipelines 1'] = {
                         'displayName': 'Science-Ready Catalogs'
                     },
                     'readme': None,
+                    'userManual': None,
+                    'pipelineHistory': None,
                     'user': {
                         'displayName': 'Test User'
                     },
@@ -2617,6 +2627,8 @@ snapshots['APITestCase::test_pipelines 1'] = {
                         'displayName': 'Data Installation'
                     },
                     'readme': None,
+                    'userManual': None,
+                    'pipelineHistory': None,
                     'user': {
                         'displayName': 'Test User'
                     },
@@ -2635,6 +2647,8 @@ snapshots['APITestCase::test_pipelines 1'] = {
                         'displayName': 'Data Preparation'
                     },
                     'readme': 'https://docs.google.com/document/d/1yHUklXgtOz6rI9ERVJOhXHUdzez8jeVjFqUGNGUC0wA/edit?usp=sharing',
+                    'userManual': 'https://docs.google.com/document/d/1yHUklXgtOz6rI9ERVJOhXHUdzez8jeVjFqUGNGUC0wA/edit?usp=sharing',
+                    'pipelineHistory': 'https://docs.google.com/document/d/1yHUklXgtOz6rI9ERVJOhXHUdzez8jeVjFqUGNGUC0wA/edit?usp=sharing',
                     'user': {
                         'displayName': 'Test User'
                     },
