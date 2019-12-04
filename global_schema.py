@@ -296,7 +296,7 @@ class Query(ObjectType):
         if _filters:
             query = query.filter(or_(*_filters))
 
-        return query.order_by(*sort)
+        return query.distinct().order_by(*sort)
 
     def resolve_modules_list(self, info, sort=list(), search=None, **args):
         query = schemas.Modules.get_query(info)
@@ -317,7 +317,7 @@ class Query(ObjectType):
         if _filters:
             query = query.filter(or_(*_filters))
 
-        return query.order_by(*sort)
+        return query.distinct().order_by(*sort)
 
     def resolve_product_type_list(
             self,
@@ -618,7 +618,7 @@ class Query(ObjectType):
         if _filters:
             query = query.filter(or_(*_filters))
 
-        return query.order_by(*sort)
+        return query.distinct().order_by(*sort)
 
     def resolve_fields_by_tag_id(self, info, tag_id, only_available=True):
         query = schemas.Fields.get_query(info)
