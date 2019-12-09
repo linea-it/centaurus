@@ -227,6 +227,10 @@ class Query(ObjectType):
         first=Int(),
         last=Int())
 
+    pipelines_by_stage_id = List(
+        lambda: schemas.Pipelines,
+        stage_id=Int())
+
     processes_by_tag_id_and_field_id_and_pipeline_id = List(
         lambda: schemas.Processes,
         pipeline_id=Int(),
@@ -393,6 +397,26 @@ class Query(ObjectType):
             result.append(schemas.PipelinesExecution(**row._asdict()))
 
         return result
+
+    # Get all pipelines, executed or not:
+    def resolve_pipelines_by_stage_id(
+        self, info, stage_id, **args):
+
+        query = schemas.Pipelines.get_query(
+            info
+        ).join(
+            models.PipelineStage
+        ).filter(
+            models.Pipelines.pipeline_stage_id == stage_id
+        ).group_by(
+            models.Pipelines.pipeline_id,
+            models.PipelineStage.pipeline_stage_id
+        ).order_by(
+            models.PipelineStage.display_name,
+            models.Pipelines.display_name
+        )
+
+        return query
 
     def resolve_processes_by_tag_id_and_field_id_and_pipeline_id(
             self, info, pipeline_id, tag_id=None, field_id=None):

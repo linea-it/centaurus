@@ -3138,6 +3138,31 @@ snapshots['APITestCase::test_pipelines_by_stage_id_and_tag_id_and_field_id 1'] =
     }
 }
 
+snapshots['APITestCase::test_pipelines_by_stage_id 1'] = {
+    'pipelinesByStageId': [
+      {
+        'pipelineId': 200,
+        'name': 'vac_cluster',
+        'displayName': 'Cluster',
+        'pipelineStage': {
+          'name': 'valueadded_catalog',
+          'displayName': 'Science-Ready Catalogs',
+          'id': 'UGlwZWxpbmVTdGFnZTo1'
+        }
+      },
+      {
+        'pipelineId': 320,
+        'name': 'vac_simulation_cluster',
+        'displayName': 'Cluster',
+        'pipelineStage': {
+          'name': 'valueadded_catalog',
+          'displayName': 'Science-Ready Catalogs',
+          'id': 'UGlwZWxpbmVTdGFnZTo1'
+        }
+      },
+    ]
+}
+
 snapshots['APITestCase::test_pipelines_no_args 1'] = {
     'pipelinesByStageIdAndTagIdAndFieldId': {
         'edges': [

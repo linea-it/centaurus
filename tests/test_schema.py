@@ -801,6 +801,25 @@ edges {
         """
         self.assertMatchSnapshot(schema.execute(query).data)
 
+
+    # Testing getting all pipelines, executed or not:
+    def test_pipelines_by_stage_id(self):
+      query = """
+        {
+          pipelinesByStageId (stageId: 5) {
+            pipelineId
+            name
+            displayName
+            pipelineStage {
+              name
+              displayName
+              id
+            }
+          }
+        }
+      """
+      self.assertMatchSnapshot(schema.execute(query).data)
+
     def test_time_profile(self):
         query = """
 {timeProfile(processId: 10031073, first: 2){
