@@ -4,7 +4,7 @@ pipeline {
 		registryCredential = 'Dockerhub'
 		dockerImage = ''
 		deployment = 'centaurus'
-		namespace = 'condor-monitor'
+		namespace = 'centaurus'
 		commit = ''
 	}
   agent any
