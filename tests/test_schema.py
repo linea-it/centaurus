@@ -801,6 +801,22 @@ edges {
         """
         self.assertMatchSnapshot(schema.execute(query).data)
 
+    def test_pipelines_by_stage_id(self):
+        query = """
+{pipelinesByStageId (first: 3, stageId: 9){
+  edges {
+    node {
+      pipelineId
+      pipelineName
+      pipelineDisplayName
+      stageDisplayName
+    }
+  }
+}
+}
+        """
+        self.assertMatchSnapshot(schema.execute(query).data)
+
     def test_time_profile(self):
         query = """
 {timeProfile(processId: 10031073, first: 2){

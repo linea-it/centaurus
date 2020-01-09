@@ -227,6 +227,14 @@ class Query(ObjectType):
         first=Int(),
         last=Int())
 
+    pipelines_by_stage_id = relay.ConnectionField(
+        schemas.PipelinesStageConnection,
+        stage_id=Int(),
+        before=String(),
+        after=String(),
+        first=Int(),
+        last=Int())
+
     processes_by_tag_id_and_field_id_and_pipeline_id = List(
         lambda: schemas.Processes,
         pipeline_id=Int(),
@@ -391,6 +399,34 @@ class Query(ObjectType):
         result = list()
         for row in query:
             result.append(schemas.PipelinesExecution(**row._asdict()))
+
+        return result
+
+    def resolve_pipelines_by_stage_id(
+            self, info, stage_id=None, **args):
+
+        query = db_session.query(
+            func.distinct(models.Pipelines.pipeline_id).label('pipeline_id'),
+            models.Pipelines.name.label('pipeline_name'),
+            models.Pipelines.display_name.label('pipeline_display_name'),
+            models.PipelineStage.display_name.label('stage_display_name'),
+        ).select_from(
+            models.Pipelines
+        ).join(
+            models.PipelineStage
+        ).group_by(
+            models.Pipelines.pipeline_id,
+            models.PipelineStage.pipeline_stage_id
+        ).filter(
+            models.Pipelines.pipeline_stage_id == stage_id
+        ).order_by(
+            models.PipelineStage.display_name,
+            models.Pipelines.display_name
+        )
+
+        result = list()
+        for row in query.all():
+            result.append(schemas.PipelinesStage(**row._asdict()))
 
         return result
 

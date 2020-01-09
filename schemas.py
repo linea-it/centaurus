@@ -327,6 +327,19 @@ class PipelinesExecution(ObjectType):
     last_process_end_time = DateTime()
     last_process_status = String()
 
+class PipelinesStage(ObjectType):
+    class Meta:
+        interfaces = (relay.Node,)
+
+    pipeline_id = Int(description="Pipeline unique ID number")
+    pipeline_name = String()
+    pipeline_display_name = String()
+    stage_display_name = String()
+
+class PipelinesStageConnection(relay.Connection):
+    class Meta:
+        node = PipelinesStage
+
 
 class PipelinesExecutionConnection(relay.Connection):
     class Meta:

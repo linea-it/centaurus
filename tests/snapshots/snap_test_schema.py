@@ -3171,6 +3171,49 @@ snapshots['APITestCase::test_pipelines_no_args 1'] = {
     }
 }
 
+snapshots['APITestCase::test_pipelines_by_stage_id 1'] = {
+    'pipelinesByStageIdAndTagIdAndFieldId': {
+        'edges': [
+            {
+                'node': {
+                    'lastProcessEndTime': '2018-06-05T20:32:19',
+                    'lastProcessId': 10031073,
+                    'lastProcessStartTime': '2018-06-05T20:20:53',
+                    'lastProcessStatus': 'success',
+                    'pipelineDisplayName': 'WAZP',
+                    'pipelineId': 214,
+                    'pipelineName': 'wazp_new',
+                    'processCount': '1',
+                    'stageDisplayName': 'Science Analysis'
+                }
+            }
+        ]
+    }
+}
+
+snapshots['APITestCase::test_pipelines_no_args 1'] = {
+    'pipelinesByStageId': {
+        'edges': [
+            {
+                'node': {
+                    'pipelineDisplayName': 'Install Catalogs',
+                    'pipelineId': 185,
+                    'pipelineName': 'install_catalogs',
+                    'stageDisplayName': 'Data Installation'
+                }
+            },
+            {
+                'node': {
+                    'pipelineDisplayName': 'WAZP',
+                    'pipelineId': 214,
+                    'pipelineName': 'wazp_new',
+                    'stageDisplayName': 'Science Analysis'
+                }
+            }
+        ]
+    }
+}
+
 snapshots['APITestCase::test_time_profile 1'] = {
     'timeProfile': {
         'edges': [
