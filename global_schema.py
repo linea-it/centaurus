@@ -754,17 +754,17 @@ class Query(ObjectType):
         query = db_session.query(
             func.distinct(models.Modules.module_id).label('module_id'),
             models.Modules.name.label('module_name'),
-            models.Modules.display_name.label('display_name')
+            models.Modules.display_name.label('display_name'),
+            models.Modules.version.label('version'),
+            models.Modules.version_date.label('version_date'),
         ).select_from(
             models.Modules
         ).join(
             models.ModuleOutput
         ).join(
             models.PipelinesModules
-        ).join(
-            models.Pipelines
         ).filter(
-            models.Pipelines.pipeline_id == pipeline_id
+            models.PipelinesModules.pipeline_id == pipeline_id
         )
 
         for module in query.all():
@@ -785,6 +785,8 @@ class Query(ObjectType):
             l_modules.append(schemas.ProductsByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
+                version=module.version,
+                version_date=module.version_date,
                 products=_products
             ))
 
@@ -798,13 +800,15 @@ class Query(ObjectType):
         query = db_session.query(
             func.distinct(models.PipelineInput.module_id).label('module_id'),
             models.Modules.name.label('module_name'),
-            models.Modules.display_name.label('display_name')
+            models.Modules.display_name.label('display_name'),
+            models.Modules.version.label('version'),
+            models.Modules.version_date.label('version_date'),
         ).select_from(
             models.PipelineInput
         ).join(
             models.Modules
         ).filter(
-            models.Pipelines.pipeline_id == pipeline_id
+            models.PipelineInput.pipeline_id == pipeline_id
         )
 
         for module in query.all():
@@ -830,6 +834,8 @@ class Query(ObjectType):
             l_modules.append(schemas.ProductsByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
+                version=module.version,
+                version_date=module.version_date,
                 products=_products
             ))
 
@@ -837,7 +843,9 @@ class Query(ObjectType):
         query = db_session.query(
             func.distinct(models.Modules.module_id).label('module_id'),
             models.Modules.name.label('module_name'),
-            models.Modules.display_name.label('display_name')
+            models.Modules.display_name.label('display_name'),
+            models.Modules.version.label('version'),
+            models.Modules.version_date.label('version_date'),
         ).select_from(
             models.Modules
         ).join(
@@ -871,6 +879,8 @@ class Query(ObjectType):
             l_modules.append(schemas.ProductsByPipeline(
                 display_name=module.display_name,
                 module_name=module.module_name,
+                version=module.version,
+                version_date=module.version_date,
                 products=_products
             ))
 

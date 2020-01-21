@@ -699,6 +699,8 @@ class ProductsByPipeline(ObjectType):
 
     display_name = String()
     module_name = String()
+    version = String()
+    version_date = String()
     products = List(String)
 
 
