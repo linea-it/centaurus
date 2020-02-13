@@ -210,6 +210,7 @@ class Query(ObjectType):
     pipelines_by_name = Field(lambda: schemas.Pipelines, name=String())
     modules_by_name = Field(lambda: schemas.Modules, name=String())
     process_by_process_id = Field(lambda: schemas.Processes, process_id=Int())
+    product_by_product_id = Field(lambda: schemas.Products, product_id=Int())
 
     # gets list by unique field
     fields_by_tag_id = List(
@@ -490,6 +491,14 @@ class Query(ObjectType):
             process_id=process_id
         ).order_by(
             models.Processes.process_id
+        ).one_or_none()
+
+    def resolve_product_by_product_id(self, info, product_id):
+        query = schemas.Products.get_query(info)
+        return query.filter_by(
+            product_id=product_id
+        ).order_by(
+            models.Products.product_id
         ).one_or_none()
 
     def resolve_release_tag_list(self, info, only_available=True, sort=list(),
