@@ -189,6 +189,8 @@ class Query(ObjectType):
         field_id=Int(),
         type_id=Int(),
         class_id=Int(),
+        display_name=String(),
+
         band=String(),
         sort=Argument(utils.sort_enum_for([
             models.Products,
@@ -624,6 +626,7 @@ class Query(ObjectType):
             field_id=None,
             type_id=None,
             class_id=None,
+            display_name=None,
             band=None,
             search=None,
             sort=list(),
@@ -655,6 +658,8 @@ class Query(ObjectType):
                 or_(models.Mask.filter == band, models.Map.filter == band))
         if class_id:
             query = query.filter(models.ProductClass.class_id == class_id)
+        if display_name:
+            query = query.filter(models.Products.display_name == display_name)
         if type_id:
             query = query.filter(models.ProductType.type_id == type_id)
 
