@@ -121,6 +121,7 @@ class Query(ObjectType):
     pipelines_modules_list = SQLAlchemyConnectionField(
         schemas.PipelinesModules)
     pipeline_stage_list = SQLAlchemyConnectionField(schemas.PipelineStage)
+    pipeline_status_list = SQLAlchemyConnectionField(schemas.PipelineStatus)
     product_type_list = SQLAlchemyConnectionField(
         schemas.ProductType,
         sort=Argument(utils.sort_enum_for(models.ProductType)),
@@ -130,6 +131,7 @@ class Query(ObjectType):
         first=Int(),
         last=Int()
     )
+
     mask_list = SQLAlchemyConnectionField(schemas.Mask)
     map_list = SQLAlchemyConnectionField(schemas.Map)
     catalog_list = SQLAlchemyConnectionField(schemas.Catalog)
@@ -352,9 +354,10 @@ class Query(ObjectType):
             func.distinct(models.Pipelines.pipeline_id).label('pipeline_id'),
             models.Pipelines.name.label('pipeline_name'),
             models.Pipelines.display_name.label('pipeline_display_name'),
+            models.Pipelines.pipeline_status_id.label('pipeline_status_id'),
             models.PipelineStage.display_name.label('stage_display_name'),
             func.count(func.distinct(models.Processes.process_id)).label('process_count'),
-            func.max(models.Processes.process_id).label('last_process_id')
+            func.max(models.Processes.process_id).label('last_process_id'),
         ).select_from(
             models.Pipelines
         ).join(
@@ -412,6 +415,7 @@ class Query(ObjectType):
             func.distinct(models.Pipelines.pipeline_id).label('pipeline_id'),
             models.Pipelines.name.label('pipeline_name'),
             models.Pipelines.display_name.label('pipeline_display_name'),
+            models.Pipelines.pipeline_status_id.label('pipeline_status_id'),
             models.PipelineStage.display_name.label('stage_display_name'),
         ).select_from(
             models.Pipelines

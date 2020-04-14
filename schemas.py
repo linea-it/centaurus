@@ -319,10 +319,10 @@ class PipelinesExecution(ObjectType):
     pipeline_id = Int(description="Pipeline unique ID number")
     pipeline_name = String()
     pipeline_display_name = String()
+    pipeline_status_id = Int()
     stage_display_name = String()
     process_count = String()
     last_process_id = Int()
-
     last_process_start_time = DateTime()
     last_process_end_time = DateTime()
     last_process_status = String()
@@ -334,6 +334,7 @@ class PipelinesStage(ObjectType):
     pipeline_id = Int(description="Pipeline unique ID number")
     pipeline_name = String()
     pipeline_display_name = String()
+    pipeline_status_id = Int()
     stage_display_name = String()
 
 class PipelinesStageConnection(relay.Connection):
