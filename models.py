@@ -265,6 +265,7 @@ class ProcessPipeline(Base):
     version_date = Column(DateTime)
 
     process = relationship('Processes', backref=backref("process_pipeline"))
+    pipeline = relationship('Pipelines', backref=backref("process_pipeline"))
 
 
 class JobRuns(Base):
