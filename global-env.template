@@ -6,3 +6,11 @@ DB_PORT=
 API_INSTANCE=testing
 SCIENCE_URL=http://testing.linea.gov.br
 DACHS_URL=http://dachsdev.linea.gov.br
+
+# Mail settings:
+MAIL_SERVER=localhost
+MAIL_PORT=25
+MAIL_USERNAME=None
+MAIL_PASSWORD=None
+MAIL_USE_TLS=False
+MAIL_USE_SSL=False

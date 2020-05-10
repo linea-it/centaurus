@@ -9,3 +9,4 @@ sqlacodegen==2.0.0
 sqlalchemy-views==0.2.2
 snapshottest>=0.5.0
 graphql-core==2.2.1
+Flask-Mail==0.9.1
