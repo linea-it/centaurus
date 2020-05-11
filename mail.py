@@ -16,7 +16,7 @@ def send(app, parameters):
     html=success_template,
     sender=parameters['sender'],
     subject=parameters['subject'],
-    recipients=[os.environ.get('MAIL_USERNAME')]
+    recipients=[os.environ.get('MAIL_RECIPIENTS')]
   )
   mail.send(msg)
   return jsonify({
